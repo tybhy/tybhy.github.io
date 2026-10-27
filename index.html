@@ -827,13 +827,8 @@ img{ display:block; }
 
   .player{ order:1; margin:12px 14px 0; border-radius:12px; }
   .player.phone{ height:min(62vh,560px); border-radius:20px; }
-  /* 自适应布局的应用：手机上直接按 390×780 渲染，画面接近真机 */
-  .player.mob{
-    align-self:center;
-    width:calc(100% - 28px); max-width:420px;
-    height:auto; margin:12px 0 0;
-    aspect-ratio:390/780; border-radius:18px;
-  }
+  /* 演示画布比例固定：桌面应用 16:9、手机应用 390:780，手机上不改比例，
+     只用全屏放大——避免同一个项目在不同屏幕上长得不一样 */
   /* 手机上去掉播放器内的地址条（字太小、点不到），全屏控制移到播放器下方 */
   .player .p-bar{ display:none; }
   .player:fullscreen .p-bar{ display:flex; padding:0; }
@@ -1249,7 +1244,6 @@ const PROJECTS = {
     short: "AI 教学平台",
     sub: "实习交付 · 高校 AI 编程教学系统：评过程不评答案，10 天交付可开课初版",
     url: "/apps/ai-teaching/index.html",
-    mob: "responsive",
     poster: "/media/posters/teaching.jpg",
     boot: "/media/posters/boot-teaching.jpg",
     guide: [
@@ -1272,7 +1266,6 @@ const PROJECTS = {
     short: "NextRAG",
     sub: "实习交付 · 财会等「错一字即事故」的场景：宁可答不出，不可答错",
     url: "/apps/nextrag/index.html",
-    mob: "responsive",
     poster: "/media/posters/nextrag.jpg",
     boot: "/media/posters/boot-nextrag.jpg",
     guide: [
@@ -1409,22 +1402,20 @@ window.addEventListener('resize', fitStage);
 let state = 'grid';          // grid | opening | detail | closing
 let currentKey = null;
 
-/* —— 播放器内部画布：桌面应用 1440×810；手机应用 390×780
-      手机上若该应用本身是自适应布局，就按手机尺寸 390×780 渲染，等于真机预览 —— */
+/* —— 播放器内部画布：一律按真实屏幕比例，不随窗口大小改比例
+      桌面/网页应用 1440×810（16:9 电脑屏幕）；手机客户端（棱镜）390×780 竖屏真机 —— */
 function playerBox(p){
-  const mob = NARROW.matches && (p.phone || p.mob === 'responsive');
-  return mob ? [390, 780, true] : [p.phone ? 390 : 1440, p.phone ? 780 : 810, false];
+  return p.phone ? [390, 780] : [1440, 810];
 }
 function fitPlayer(){
   const p = PROJECTS[currentKey] || {};
-  const [W, H, mob] = playerBox(p);
-  playerEl.classList.toggle('mob', mob);
+  const [W, H] = playerBox(p);
   const full = document.fullscreenElement === playerEl;
   const cw = playerEl.clientWidth  || W;
   const ch = playerEl.clientHeight || H;
 
   /* 全屏 · 桌面应用且屏幕比设计稿大：按真实像素铺满，1:1 渲染，无黑边不模糊 */
-  if(full && !p.phone && !mob && cw >= W && ch >= H){
+  if(full && !p.phone && cw >= W && ch >= H){
     frame.style.width  = cw + 'px';
     frame.style.height = ch + 'px';
     frame.style.transform = 'none';
@@ -1520,13 +1511,11 @@ function renderInfo(key){
   document.getElementById('dt-addr').textContent = addrText;
   document.getElementById('dt-badge').textContent = p.badge || '打开即用';
 
-  /* 手机提示行：自适应应用直接说「可点」，桌面端应用提示横屏更清楚 */
+  /* 手机提示行：手机客户端可直接点；桌面端应用提示画面小、建议全屏横屏 */
   const mtxt = document.getElementById('dt-mhint-txt');
   if(mtxt) mtxt.textContent = p.phone
     ? '手机客户端界面 · 可直接点'
-    : (p.mob === 'responsive'
-        ? '已适配手机屏 · 可直接上手点'
-        : '桌面端应用，手机上画面较小 · 横屏更清楚');
+    : '桌面端应用，按电脑屏幕比例显示 · 点「全屏查看」横过来更清楚';
 
   document.getElementById('dt-guide').innerHTML = p.guide.map((g, i) =>
     `<li${i === 0 ? ' class="on"' : ''}><span><b>${g.t}</b>——${g.d}</span></li>`).join('');
