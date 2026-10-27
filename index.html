@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>朱建宇 · AI 产品作品集｜五个可在线操作的项目</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="description" content="朱建宇，广东工业大学 2028 届 · 大数据管理与应用，找 AI 产品方向实习：掌动智能 5 个月交付三个 AI 产品（AgentBuild 智能体开发平台、AI 开发教学平台、NextRAG 材料审阅问答），另有自研多智能体协作交付引擎与手机远程 AI 编程客户端，全部可在线操作。" />
@@ -580,6 +580,7 @@ img{ display:block; }
   box-shadow:inset 1px 0 0 var(--line);
 }
 .dt-guide{ list-style:none; counter-reset:g; margin-top:4px; }
+.dt-side .dt-sec-guide{ margin-top:0; }
 .dt-guide li{
   counter-increment:g;
   display:grid; grid-template-columns:26px 1fr; gap:10px;
@@ -629,6 +630,300 @@ img{ display:block; }
   .work{ height:auto; min-height:100vh; padding:60px 0; }
   .board{ position:relative; inset:auto; margin:0 16px; height:calc(100vh - 60px); }
 }
+
+/* 手机端用的“手机提示行”，桌面不显示 */
+.dt-mhint{ display:none; }
+
+/* =============================================================
+   5. 手机版（≤900px）
+   原则：不做整页等比缩放，改为真实排版；正文 12.5–15px 起；
+        所有可点区域 ≥44px；单列纵向、无横向滚动。
+   ============================================================= */
+@media (max-width:900px){
+  :root{ --m-pad:20px; --tap:44px; --dim:#66717f; }
+  body{ font-size:15px; line-height:1.72; }
+  .grain{ opacity:.05; }
+
+  /* ───────── 第一屏 ───────── */
+  .stage{
+    display:block; height:auto; min-height:0;
+    padding:0 0 36px;
+    background:linear-gradient(180deg,
+      var(--bg-top) 0%, var(--bg-top) 84%,
+      #e4ebf2 95%, var(--band) 100%);
+  }
+  .s-canvas{
+    position:static; display:block;
+    width:auto; height:auto; padding:0 var(--m-pad);
+    transform:none;
+  }
+  .me{ width:auto; }
+
+  .me-top{ gap:16px; padding-top:28px; }
+  .photo{ width:76px; height:103px; border-radius:3px; }
+  .me .kicker{ font-size:9.5px; letter-spacing:.18em; margin-top:3px; white-space:nowrap; }
+  .me h1{ font-size:31px; margin-top:7px; letter-spacing:-.01em; }
+  .me .idline{ font-size:13px; margin-top:8px; }
+
+  .soft{ margin-top:24px; }
+  .soft li{
+    grid-template-columns:1fr; gap:3px;
+    padding:12px 0 11px; font-size:13px; line-height:1.72;
+  }
+  .soft .k{ padding-top:0; font-size:9.5px; letter-spacing:.24em; }
+  .soft .v br{ display:none; }
+
+  .soft-block{ margin-top:20px; }
+  .soft-block .sb-t{ font-size:9.5px; }
+  .soft-block .sums li{ padding:9px 0 8px; font-size:12.5px; line-height:1.72; }
+  .soft-block .sums li b{ display:inline-block; min-width:38px; margin-right:6px; }
+
+  .me-bottom{ margin-top:22px; padding-top:0; }
+  .contact{ font-size:13px; gap:5px; }
+  /* 滚动提示改成可点的按钮：点一下直达作品板 */
+  .scroll-hint{
+    margin-top:18px; min-height:var(--tap);
+    padding:0 16px; border-radius:999px;
+    width:max-content;
+    font-size:10px; letter-spacing:.18em;
+    background:rgba(31,95,208,.06);
+    box-shadow:inset 0 0 0 1px rgba(31,95,208,.14);
+    color:#2c4a75;
+  }
+  .scroll-hint i{ height:16px; width:1px; }
+
+  /* 能力块：从「按比例分格」改成可展开的纵向卡片 */
+  .caps{ margin:26px 0 0; gap:8px; }
+  .cap{
+    flex:none; min-height:0;
+    background:#fff; border-radius:7px;
+    box-shadow:0 0 0 1px rgba(20,34,52,.07), 0 8px 18px -14px rgba(var(--shadow-c),.5);
+    transition:box-shadow .3s ease, background .3s ease;
+  }
+  .cap[data-open="1"]{
+    box-shadow:0 0 0 1px rgba(31,95,208,.20), 0 16px 30px -22px rgba(var(--shadow-c),.55);
+    cursor:pointer;
+  }
+  .cap-head{
+    display:grid; grid-template-columns:auto 1fr auto;
+    align-items:center; gap:5px 12px;
+    min-height:var(--tap); padding:13px 16px;
+  }
+  .cap-idx{ grid-area:1/1; font-size:9.5px; }
+  .cap-title{ grid-area:1/2; font-size:17px; }
+  .cap-sign{
+    grid-area:1/3; width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; margin:0;
+  }
+  .cap-one{
+    grid-area:2/1/2/4;
+    white-space:normal; font-size:12px; line-height:1.6;
+    overflow:visible; text-overflow:clip;
+  }
+  .cap[data-open="1"] .cap-one{ display:none; }
+  .cap-body{
+    display:none; padding:0 16px 16px;
+    overflow:visible; opacity:1; transform:none;
+  }
+  .cap[data-open="1"] .cap-body{
+    display:flex;
+    animation:m-rise .34s var(--ease-out) both;
+  }
+  .tline{ overflow:visible; justify-content:flex-start; }
+  .trow{ grid-template-columns:1fr; gap:1px; padding:12px 0 11px; }
+  .trow .y{ font-size:10.5px; letter-spacing:.1em; padding-top:0; }
+  .trow .w b{ font-size:14px; line-height:1.5; }
+  .trow .w p{ font-size:12.5px; line-height:1.82; margin-top:5px; }
+  .cap-chips{ padding-top:12px; gap:6px; }
+  .chip{ font-size:11px; padding:5px 10px; letter-spacing:.04em; }
+
+  /* ───────── 第二屏：磁吸板 → 纵向作品列表 ───────── */
+  .work{
+    height:auto; min-height:0; padding:28px 0 34px;
+    background:
+      radial-gradient(80% 40% at 50% -6%, rgba(255,255,255,.95), transparent 62%),
+      var(--band);
+  }
+  .board{
+    position:static; inset:auto; height:auto;
+    margin:0 14px; padding:20px 16px 20px;
+    border-radius:9px; overflow:hidden;
+  }
+  .board::before{
+    background-size:12px 12px;
+    mask-image:radial-gradient(110% 60% at 50% 0%, #000 10%, transparent 75%);
+  }
+  .b-head{
+    position:static; left:auto; right:auto; top:auto;
+    display:flex; align-items:center; gap:8px;
+    font-size:9px; letter-spacing:.18em;
+  }
+  .b-head .l{ gap:8px; }
+  .b-head .l i{ width:14px; }
+  .b-head .r{ display:none; }
+
+  .b-canvas{ position:static; width:auto; height:auto; transform:none; }
+  .b-col{
+    position:static; left:auto; top:auto; width:auto;
+    transform:none; margin-top:18px;
+  }
+  .b-col .name{ display:none; }
+  .b-col h2{ font-size:26px; line-height:1.36; margin-top:0; letter-spacing:-.02em; }
+  .b-col .claim{ font-size:12.5px; line-height:1.95; margin-top:12px; }
+  .b-rule{ margin-top:18px; }
+  .b-facts{ gap:0; margin-top:16px; }
+  .b-facts > div{ flex:1; }
+  .b-facts b{ font-size:20px; }
+  .b-facts span{ font-size:9px; letter-spacing:.1em; }
+
+  .stage2{ position:static; display:flex; flex-direction:column; gap:13px; margin-top:24px; }
+  .stage2 > .card{
+    position:static; width:auto; left:auto; top:auto;
+    transform:none !important;
+    padding:7px 7px 0; border-radius:6px;
+  }
+  .stage2 > .card:active{
+    transform:scale(.988) !important;
+    box-shadow:0 0 0 1px rgba(31,95,208,.28), 0 6px 16px -10px rgba(var(--shadow-c),.5);
+  }
+  .card .pin{ display:none; }
+  .card img{ aspect-ratio:16/10; border-radius:3px; }
+  .card .cbody{ padding:11px 6px 13px; }
+  .card .ctop{ margin-top:1px; }
+  .card .cnum{ font-size:9px; letter-spacing:.16em; }
+  .card .go{ opacity:1; transform:none; font-size:9.5px; }
+  .card h3{ font-size:15px; line-height:1.45; margin:5px 0 4px; }
+  .card p{ font-size:12.5px; line-height:1.7; }
+  .ghost{ display:none; }
+
+  .b-foot{
+    position:static; left:auto; right:auto; bottom:auto;
+    margin-top:22px; padding-top:12px;
+    font-size:9.5px; letter-spacing:.08em; line-height:1.7;
+  }
+  .b-foot .fr{ display:none; }
+
+  /* ───────── 第三屏：详情 → 单列（播放器在上，说明在下） ───────── */
+  .detail{ height:100dvh; }
+  .dt-nav{
+    height:auto; min-height:52px; gap:12px;
+    padding:calc(env(safe-area-inset-top) + 6px) 14px 6px;
+  }
+  .dt-back{ min-height:var(--tap); font-size:12px; letter-spacing:.06em; gap:8px; }
+  .dt-crumbs{ display:none; }
+  .dt-navbadge{ font-size:9px; letter-spacing:.1em; padding:5px 9px; }
+
+  .dt-main{
+    display:flex; flex-direction:column;
+    overflow-y:auto; overflow-x:hidden;
+    overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom));
+  }
+  /* 两栏外壳在手机上拆掉，让内容按阅读顺序重排 */
+  .dt-left, .dt-left-in, .dt-side{ display:contents; }
+  /* 纵向 flex 里每块都按自身内容定高，避免被挤压（播放器尤其不能被压扁） */
+  .player, .dt-mhint, .dt-title, .dt-nums, .dt-sec{ flex:0 0 auto; }
+
+  .player{ order:1; margin:12px 14px 0; border-radius:12px; }
+  .player.phone{ height:min(62vh,560px); border-radius:20px; }
+  /* 自适应布局的应用：手机上直接按 390×780 渲染，画面接近真机 */
+  .player.mob{
+    align-self:center;
+    width:calc(100% - 28px); max-width:420px;
+    height:auto; margin:12px 0 0;
+    aspect-ratio:390/780; border-radius:18px;
+  }
+  /* 手机上去掉播放器内的地址条（字太小、点不到），全屏控制移到播放器下方 */
+  .player .p-bar{ display:none; }
+  .player:fullscreen .p-bar{ display:flex; padding:0; }
+
+  .dt-mhint{
+    order:2;
+    display:flex; align-items:center; gap:12px;
+    margin:10px 20px 0;
+    font-size:11.5px; line-height:1.6; color:var(--dim);
+  }
+  .dt-mhint[hidden]{ display:none; }
+  .mhint-btn{
+    margin-left:auto; flex:none;
+    min-height:44px; padding:0 16px; border-radius:999px;
+    font-size:12px; letter-spacing:.02em; color:#1f5fd0;
+    background:rgba(31,95,208,.07);
+    box-shadow:inset 0 0 0 1px rgba(31,95,208,.20);
+    transition:background .2s ease;
+  }
+  .mhint-btn:active{ background:rgba(31,95,208,.16); }
+
+  .dt-title{ order:3; margin:12px 20px 0; }
+  .dt-title h2{ font-size:19px; line-height:1.4; }
+  .dt-title .sub{ font-size:12.5px; line-height:1.7; margin-top:7px; }
+
+  .dt-nums{
+    order:4; display:grid; grid-template-columns:repeat(3,1fr);
+    gap:10px; margin:0 20px; padding:16px 0 0;
+  }
+  .dt-nums div b{ font-size:19px; }
+  .dt-nums div span{ font-size:9px; letter-spacing:.06em; line-height:1.5; display:block; margin-top:3px; }
+
+  .dt-sec{ margin-top:24px; }
+  .dt-sec h3{ font-size:9px; letter-spacing:.2em; padding-bottom:9px; }
+
+  .dt-sec-guide{ order:5; margin:26px 20px 0; }
+  .dt-guide{ margin-top:10px; }
+  .dt-guide li{
+    grid-template-columns:22px 1fr; gap:10px;
+    padding:12px 13px; margin-top:8px;
+    font-size:12.5px; line-height:1.72; border-radius:8px;
+    min-height:var(--tap);
+  }
+  .dt-guide li:active{ box-shadow:0 0 0 1px rgba(31,95,208,.45); background:#f7faff; }
+
+  .dt-sec-dec{ order:6; margin:26px 20px 0; }
+  .dt-dec li{ font-size:12.5px; line-height:1.85; padding:12px 0 11px; }
+
+  .dt-sec-more{ order:7; margin:28px -20px 0; padding:0 20px; }
+  .dt-more{
+    flex-direction:row; gap:10px;
+    overflow-x:auto; scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    padding:10px 0 6px;
+  }
+  .dt-more button{
+    flex:0 0 78%; grid-template-columns:96px 1fr; gap:10px;
+    scroll-snap-align:start; min-height:calc(var(--tap) + 8px);
+    padding:6px; border-radius:8px;
+  }
+  .dt-more button:active{ transform:none; box-shadow:0 0 0 1px rgba(31,95,208,.4); }
+  .dt-more img{ width:96px; border-radius:5px; }
+  .dt-more .mtxt b{ font-size:12.5px; }
+  .dt-more .mtxt span{ font-size:10.5px; line-height:1.5; }
+
+  /* 手机上的点按反馈：不做 hover，只做按下 */
+  .cap:active, .scroll-hint:active{ opacity:.86; }
+}
+
+/* 平板（竖持 640–900）：单列还原成两列，正文限宽，避免一行太长 */
+@media (min-width:640px) and (max-width:900px){
+  .s-canvas{ max-width:720px; margin:0 auto; }
+  .board{ max-width:744px; margin:0 auto; }
+  .caps{ display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:start; }
+  .cap[data-open="1"]{ grid-column:1 / -1; }
+  .stage2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .dt-main{ max-width:720px; margin:0 auto; width:100%; }
+  .dt-more button{ flex:0 0 320px; }
+}
+
+@keyframes m-rise{
+  from{ opacity:0; transform:translateY(6px); }
+  to  { opacity:1; transform:none; }
+}
+
+@media (max-width:380px){
+  .me h1{ font-size:28px; }
+  .b-col h2{ font-size:24px; }
+  .dt-more button{ flex-basis:84%; }
+}
 </style>
 </head>
 <body>
@@ -649,9 +944,9 @@ img{ display:block; }
     </div>
 
     <ul class="soft">
-      <li><span class="k">学校</span><span class="v"><b>广东工业大学</b> · 大数据管理与应用 · 2024 级本科（2028.06 毕业）<br>主修：大数据分析 / Python / 数据库</span></li>
-      <li><span class="k">现状</span><span class="v">广州 · 每周到岗 5 天 · 可实习 3 个月以上<br>正在找 <b>2028 届 AI 产品方向实习</b></span></li>
-      <li><span class="k">MBTI</span><span class="v"><b>ENTP</b> · 辩论家——外向 92%、天马行空 79%、<br>理性思考 84%、随机应变 85%、自信果断 97%</span></li>
+      <li><span class="k">学校</span><span class="v"><b>广东工业大学</b> · 大数据管理与应用 · 2024 级本科（2028.06 毕业）<br> 主修：大数据分析 / Python / 数据库</span></li>
+      <li><span class="k">现状</span><span class="v">广州 · 每周到岗 5 天 · 可实习 3 个月以上<br> 正在找 <b>2028 届 AI 产品方向实习</b></span></li>
+      <li><span class="k">MBTI</span><span class="v"><b>ENTP</b> · 辩论家——外向 92%、天马行空 79%、<br> 理性思考 84%、随机应变 85%、自信果断 97%</span></li>
       <li><span class="k">优势</span><span class="v"><b>产品、开发、市场、销售、运营，五个环节都自己跑过</b>：3 个 AI 产品独立交付，社群从 0 做到 627 人、转化 20%；跟业务方聊得清需求，也自己写得完代码，多线并行扛得住。</span></li>
     </ul>
 
@@ -670,7 +965,7 @@ img{ display:block; }
         <span class="num">18402005173</span>
         <span>18402005173@163.com</span>
       </div>
-      <div class="scroll-hint"><i></i><span>往下 · 五件可操作的作品</span></div>
+      <a class="scroll-hint" href="#work"><i></i><span>往下 · 五件可操作的作品</span></a>
     </div>
   </aside>
 
@@ -888,6 +1183,11 @@ img{ display:block; }
           </div>
         </div>
 
+        <div class="dt-mhint" id="dt-mhint">
+          <span id="dt-mhint-txt">桌面端应用，手机上画面较小</span>
+          <button class="mhint-btn" id="dt-fs2" type="button">全屏查看</button>
+        </div>
+
         <div class="dt-title">
           <h2 id="dt-name">—</h2>
           <p class="sub" id="dt-sub">—</p>
@@ -895,7 +1195,7 @@ img{ display:block; }
 
         <div class="dt-nums" id="dt-nums"></div>
 
-        <section class="dt-sec">
+        <section class="dt-sec dt-sec-dec">
           <h3>怎么做的 · 从定位到验收</h3>
           <ul class="dt-dec" id="dt-dec"></ul>
         </section>
@@ -903,12 +1203,12 @@ img{ display:block; }
     </div>
 
     <aside class="dt-side">
-      <section class="dt-sec" style="margin-top:0">
+      <section class="dt-sec dt-sec-guide">
         <h3>上手路线 · 从上往下点</h3>
         <ol class="dt-guide" id="dt-guide"></ol>
       </section>
 
-      <section class="dt-sec">
+      <section class="dt-sec dt-sec-more">
         <h3>接着看下一件</h3>
         <div class="dt-more" id="dt-more"></div>
       </section>
@@ -949,6 +1249,7 @@ const PROJECTS = {
     short: "AI 教学平台",
     sub: "实习交付 · 高校 AI 编程教学系统：评过程不评答案，10 天交付可开课初版",
     url: "/apps/ai-teaching/index.html",
+    mob: "responsive",
     poster: "/media/posters/teaching.jpg",
     boot: "/media/posters/boot-teaching.jpg",
     guide: [
@@ -971,6 +1272,7 @@ const PROJECTS = {
     short: "NextRAG",
     sub: "实习交付 · 财会等「错一字即事故」的场景：宁可答不出，不可答错",
     url: "/apps/nextrag/index.html",
+    mob: "responsive",
     poster: "/media/posters/nextrag.jpg",
     boot: "/media/posters/boot-nextrag.jpg",
     guide: [
@@ -1043,16 +1345,25 @@ const PROJECTS = {
    ═══════════════════════════════════════════════ */
 (function(){
   const caps = Array.from(document.querySelectorAll('.cap'));
+  function setCap(target){
+    caps.forEach(c => {
+      const on = c === target;
+      c.dataset.open = on ? '1' : '0';
+      c.style.setProperty('--g', on ? '4' : '1');
+      c.querySelector('.cap-head').setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+  }
   caps.forEach(cap => {
     cap.querySelector('.cap-head').addEventListener('click', () => {
-      if(cap.dataset.open === '1') return;
-      caps.forEach(c => {
-        const on = c === cap;
-        c.dataset.open = on ? '1' : '0';
-        c.style.setProperty('--g', on ? '4' : '1');
-        c.querySelector('.cap-head').setAttribute('aria-expanded', on ? 'true' : 'false');
-      });
+      const open = cap.dataset.open === '1';
+      /* 桌面：始终保留一块展开（点已展开的那块无效）；手机：再点一次可收起 */
+      if(open && !matchMedia('(max-width: 900px)').matches) return;
+      setCap(open ? null : cap);
     });
+  });
+  /* 从手机宽度拉回桌面时，恢复「产品展开、其余收起」的默认比例 */
+  matchMedia('(max-width: 900px)').addEventListener('change', e => {
+    if(!e.matches) setCap(caps[0]);
   });
 })();
 
@@ -1070,12 +1381,15 @@ Object.values(PROJECTS).forEach(p => { [p.poster, p.boot].forEach(src => { if(sr
 const crumbsEl  = document.getElementById('dt-crumbs-cur');
 
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* 手机版不做等比缩放，改用真实排版；这里只负责在桌面/手机之间切换时复位 */
+const NARROW = matchMedia('(max-width: 900px)');
 
 /* —— 板面内容画布等比缩放：设计基准 1388×848 —— */
 const boardEl = document.querySelector('.board');
 const BASE_W = 1388, BASE_H = 848;
 function fitBoard(){
   if(!boardEl) return;
+  if(NARROW.matches){ boardEl.style.setProperty('--bs', 1); return; }
   const s = Math.min(boardEl.clientWidth / BASE_W, boardEl.clientHeight / BASE_H);
   boardEl.style.setProperty('--bs', s);
 }
@@ -1086,6 +1400,7 @@ window.addEventListener('resize', fitBoard);
 const stageEl = document.getElementById('top');
 function fitStage(){
   if(!stageEl) return;
+  if(NARROW.matches){ stageEl.style.setProperty('--ss', 1); return; }
   const s = Math.min(stageEl.clientWidth / 1440, stageEl.clientHeight / 900);
   stageEl.style.setProperty('--ss', s);
 }
@@ -1094,16 +1409,22 @@ window.addEventListener('resize', fitStage);
 let state = 'grid';          // grid | opening | detail | closing
 let currentKey = null;
 
-/* —— 播放器内部画布：桌面应用 1440×810，手机应用 390×780 —— */
+/* —— 播放器内部画布：桌面应用 1440×810；手机应用 390×780
+      手机上若该应用本身是自适应布局，就按手机尺寸 390×780 渲染，等于真机预览 —— */
+function playerBox(p){
+  const mob = NARROW.matches && (p.phone || p.mob === 'responsive');
+  return mob ? [390, 780, true] : [p.phone ? 390 : 1440, p.phone ? 780 : 810, false];
+}
 function fitPlayer(){
   const p = PROJECTS[currentKey] || {};
-  const W = p.phone ? 390 : 1440, H = p.phone ? 780 : 810;
+  const [W, H, mob] = playerBox(p);
+  playerEl.classList.toggle('mob', mob);
   const full = document.fullscreenElement === playerEl;
   const cw = playerEl.clientWidth  || W;
   const ch = playerEl.clientHeight || H;
 
   /* 全屏 · 桌面应用且屏幕比设计稿大：按真实像素铺满，1:1 渲染，无黑边不模糊 */
-  if(full && !p.phone && cw >= W && ch >= H){
+  if(full && !p.phone && !mob && cw >= W && ch >= H){
     frame.style.width  = cw + 'px';
     frame.style.height = ch + 'px';
     frame.style.transform = 'none';
@@ -1124,18 +1445,31 @@ window.addEventListener('resize', () => { if(state === 'detail') fitPlayer(); })
 
 /* —— 全屏查看演示：整屏放大播放器，画面等比居中 —— */
 const fsBtn = document.getElementById('dt-fs');
-if(!playerEl.requestFullscreen){ fsBtn.style.display = 'none'; }
-fsBtn.addEventListener('click', () => {
+const fsBtn2 = document.getElementById('dt-fs2');
+if(!playerEl.requestFullscreen){ fsBtn.style.display = 'none'; if(fsBtn2) fsBtn2.style.display = 'none'; }
+function toggleFull(){
   if(document.fullscreenElement){
     if(document.exitFullscreen) document.exitFullscreen();
   }else if(playerEl.requestFullscreen){
-    playerEl.requestFullscreen().catch(() => {});
+    playerEl.requestFullscreen().then(() => {
+      /* 手机上把桌面端演示横过来看：全屏后尝试锁定横屏（不支持的浏览器静默跳过） */
+      const p = PROJECTS[currentKey] || {};
+      if(NARROW.matches && !p.phone && screen.orientation && screen.orientation.lock){
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    }).catch(() => {});
   }
-});
+}
+fsBtn.addEventListener('click', toggleFull);
+if(fsBtn2) fsBtn2.addEventListener('click', toggleFull);
 document.addEventListener('fullscreenchange', () => {
   const on = document.fullscreenElement === playerEl;
   fsBtn.textContent = on ? '退出全屏' : '全屏';
   fsBtn.setAttribute('aria-label', on ? '退出全屏' : '全屏查看演示');
+  if(fsBtn2) fsBtn2.textContent = on ? '退出全屏' : '全屏查看';
+  if(!on && screen.orientation && screen.orientation.unlock){
+    try{ screen.orientation.unlock(); }catch(e){}
+  }
   /* 全屏切换时容器尺寸要下一帧才落定，连打几次保证算到真实宽高 */
   fitPlayer();
   requestAnimationFrame(fitPlayer);
@@ -1185,6 +1519,14 @@ function renderInfo(key){
     : hostNow + (p.url || '');
   document.getElementById('dt-addr').textContent = addrText;
   document.getElementById('dt-badge').textContent = p.badge || '打开即用';
+
+  /* 手机提示行：自适应应用直接说「可点」，桌面端应用提示横屏更清楚 */
+  const mtxt = document.getElementById('dt-mhint-txt');
+  if(mtxt) mtxt.textContent = p.phone
+    ? '手机客户端界面 · 可直接点'
+    : (p.mob === 'responsive'
+        ? '已适配手机屏 · 可直接上手点'
+        : '桌面端应用，手机上画面较小 · 横屏更清楚');
 
   document.getElementById('dt-guide').innerHTML = p.guide.map((g, i) =>
     `<li${i === 0 ? ' class="on"' : ''}><span><b>${g.t}</b>——${g.d}</span></li>`).join('');
@@ -1251,6 +1593,14 @@ function loadApp(key){
   }
 }
 
+/* —— 详情内滚动复位：手机上正文在 .dt-main 里滚，切项目回到顶部 —— */
+function resetDetailScroll(){
+  ['.dt-main', '.dt-left', '.dt-side'].forEach(sel => {
+    const el = document.querySelector(sel);
+    if(el) el.scrollTop = 0;
+  });
+}
+
 /* —— 打开：轻量淡入，动画落定后再加载应用（转场与重加载彻底分离） —— */
 function openDetail(key, card){
   if(state !== 'grid') return;
@@ -1260,6 +1610,7 @@ function openDetail(key, card){
   detail.dataset.state = 'anim';
   detail.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
+  resetDetailScroll();
 
   renderInfo(key);
   showBoot(PROJECTS[key]);
@@ -1307,6 +1658,7 @@ function switchProject(key){
   showBoot(PROJECTS[key]);
   fitPlayer();
   loadApp(key);
+  resetDetailScroll();
 }
 
 /* —— 事件绑定 —— */
