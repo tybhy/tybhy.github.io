@@ -1,0 +1,8 @@
+/apps/*
+  Cache-Control: no-cache
+
+/demo/*
+  Cache-Control: max-age=600
+
+/media/*
+  Cache-Control: max-age=86400

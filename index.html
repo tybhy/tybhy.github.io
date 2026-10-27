@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>朱建宇 · AI 产品作品集｜五个可在线操作的项目</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="description" content="朱建宇，广东工业大学 2028 届 · 大数据管理与应用，找 AI 产品方向实习：掌动智能 5 个月交付三个 AI 产品（AgentBuild 智能体开发平台、AI 开发教学平台、NextRAG 材料审阅问答），另有自研多智能体协作交付引擎与手机远程 AI 编程客户端，全部可在线操作。" />
+<style>
+/* =============================================================
+   0. 设计令牌
+   ============================================================= */
+:root{
+  --bg-top:   #f3f6fa;
+  --band:     #ccd6e4;   /* 磁吸板区色带 */
+  --plate:    #f6f9fd;
+  --card:     #ffffff;
+  --surface:  #ffffff;
+  --tint:     rgba(255,255,255,.55);
+  --ink:      #131a23;
+  --ink-2:    #37424f;
+  --dim:      #78838f;
+  --blue:     #1f5fd0;
+  --green:    #2f9e6a;
+  --line:     rgba(20,34,52,.13);
+  --line-soft:rgba(20,34,52,.08);
+  --shadow-c: 24,40,62;
+  --sans:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --ease-back:cubic-bezier(.32,.94,.24,1);
+}
+
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  background:var(--bg-top);
+}
+::selection{ background:rgba(31,95,208,.22); }
+a{ color:inherit; text-decoration:none; }
+button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+img{ display:block; }
+.num, .fnum{ font-variant-numeric:tabular-nums; }
+
+.grain{
+  position:fixed; inset:0; pointer-events:none; z-index:40;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  opacity:.08; mix-blend-mode:multiply;
+}
+
+/* =============================================================
+   1. 第一屏 —— 左：软信息 ｜ 右：四块能力手风琴
+   ============================================================= */
+.stage{
+  height:100vh;
+  min-height:640px;
+  position:relative;
+  background:linear-gradient(180deg,
+    var(--bg-top) 0%, var(--bg-top) 70%,
+    #e2e9f1 90%, var(--band) 100%);
+}
+/* 第一屏内容画布：按 1440×900 设计，整体等比缩放适配任意窗口 */
+.s-canvas{
+  position:absolute; left:50%; top:50%;
+  width:1440px; height:900px; box-sizing:border-box;
+  padding:49.5px 66px;
+  display:flex;
+  transform:translate(-50%,-50%) scale(var(--ss,1));
+  transform-origin:50% 50%;
+}
+
+/* ── 左栏：照片 + 个人介绍 ── */
+.me{
+  width:360px;
+  flex:none;
+  display:flex; flex-direction:column;
+}
+.me-top{ display:flex; gap:22px; align-items:flex-start; }
+.photo{
+  width:104px; height:140px; object-fit:cover; flex:none;
+  border-radius:4px;
+  box-shadow:
+    0 0 0 1px rgba(20,34,52,.10),
+    0 14px 26px -14px rgba(var(--shadow-c),.42);
+  background:#dde5ee;
+}
+.me .kicker{
+  font-size:10px; letter-spacing:.3em; color:var(--dim);
+  text-transform:uppercase; margin-top:4px;
+}
+.me h1{
+  font-size:34px; line-height:1.2;
+  font-weight:600; letter-spacing:-.02em; margin-top:8px;
+}
+.me .idline{
+  margin-top:8px; font-size:13px; color:var(--ink-2); letter-spacing:.01em;
+}
+.soft{
+  margin-top:32px;
+  border-top:1px solid var(--line-soft);
+}
+.soft li{
+  list-style:none;
+  display:grid; grid-template-columns:74px 1fr; gap:14px;
+  padding:10px 0 9px; border-bottom:1px solid var(--line-soft);
+  font-size:12.5px; line-height:1.75;
+}
+.soft .k{
+  font-size:10px; letter-spacing:.2em; color:var(--dim);
+  padding-top:4px; white-space:nowrap;
+}
+.soft .v{ color:var(--ink-2); }
+.soft .v b{ color:var(--ink); font-weight:500; }
+.soft-block{ margin-top:16px; }
+.soft-block .sb-t{ font-size:10px; letter-spacing:.28em; color:var(--dim); text-transform:uppercase; }
+.soft-block .sums{ margin-top:6px; border-top:1px solid var(--line-soft); }
+.soft-block .sums li{ list-style:none; padding:5px 0 4px; border-bottom:1px solid var(--line-soft); font-size:12px; line-height:1.65; color:var(--ink-2); }
+.soft-block .sums li b{ color:var(--ink); font-weight:600; margin-right:9px; }
+
+.me-bottom{ margin-top:auto; padding-top:22px; }
+.contact{ display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--ink-2); }
+.contact .num{ letter-spacing:.04em; }
+.scroll-hint{
+  margin-top:16px;
+  display:flex; align-items:center; gap:12px;
+  font-size:10px; letter-spacing:.24em; color:var(--dim);
+  text-transform:uppercase;
+}
+.scroll-hint i{
+  width:1px; height:30px; background:rgba(20,34,52,.34);
+  transform-origin:top; animation:breathe 3.2s ease-in-out infinite;
+}
+@keyframes breathe{
+  0%,100%{ transform:scaleY(.55); opacity:.45; }
+  50%    { transform:scaleY(1);   opacity:1; }
+}
+
+/* ── 右栏：四块能力 ── */
+.caps{
+  flex:1; min-width:0;
+  display:flex; flex-direction:column; gap:10px;
+  margin-left:52px;
+}
+.cap{
+  position:relative;
+  flex:var(--g,1) 1 0;
+  min-height:72px;
+  overflow:hidden;
+  background:var(--tint);
+  border-radius:3px;
+  box-shadow:inset 0 0 0 1px rgba(20,34,52,.05);
+  transition:flex-grow .65s var(--ease-out), background .45s ease, box-shadow .45s ease;
+  cursor:pointer;
+  display:flex; flex-direction:column;
+}
+.cap[data-open="1"]{
+  background:var(--surface);
+  box-shadow:
+    inset 0 0 0 1px rgba(20,34,52,.06),
+    0 18px 34px -22px rgba(var(--shadow-c),.38);
+  cursor:default;
+}
+.cap-head{
+  flex:none;
+  display:flex; align-items:baseline; gap:16px;
+  padding:21.6px 26px 14.4px;
+  width:100%; text-align:left;
+}
+.cap-idx{
+  font-size:10px; letter-spacing:.22em; color:var(--dim);
+  font-variant-numeric:tabular-nums;
+}
+.cap-title{
+  font-size:18px; font-weight:600; letter-spacing:.02em;
+  flex:none;
+}
+.cap-one{
+  font-size:11.5px; color:var(--dim); letter-spacing:.02em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  min-width:0;
+}
+.cap-sign{
+  margin-left:auto; flex:none;
+  font-size:13px; color:var(--dim);
+  transition:transform .45s var(--ease-out), opacity .3s ease;
+}
+.cap[data-open="1"] .cap-sign{ transform:rotate(45deg); opacity:.35; }
+.cap[data-open="1"] .cap-one{ opacity:0; }
+
+.cap-body{
+  flex:1; min-height:0;
+  padding:0 26px 18px;
+  opacity:0; transform:translateY(10px);
+  transition:opacity .5s ease .12s, transform .55s var(--ease-out) .12s;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.cap[data-open="1"] .cap-body{ opacity:1; transform:none; }
+
+.tline{ overflow:hidden; flex:1; display:flex; flex-direction:column; justify-content:center; }
+.trow{
+  display:grid; grid-template-columns:118px 1fr; gap:22px;
+  padding:11px 0 10px;
+  border-bottom:1px solid var(--line-soft);
+}
+.trow:last-child{ border-bottom:none; }
+.trow .y{
+  font-size:11px; color:var(--dim); letter-spacing:.06em;
+  font-variant-numeric:tabular-nums; text-align:left; padding-top:3px;
+  white-space:nowrap;
+}
+.trow .w b{
+  display:block; font-size:13.5px; font-weight:600; letter-spacing:.01em;
+}
+.trow .w p{ font-size:12px; color:var(--ink-2); line-height:1.8; margin-top:3px; }
+.trow .w p em{ font-style:normal; color:var(--ink); font-weight:500; }
+.cap-chips{
+  margin-top:auto; padding-top:12px;
+  display:flex; flex-wrap:wrap; gap:5px;
+}
+.chip{
+  font-size:10px; letter-spacing:.08em; color:#3c5675;
+  padding:3px 9px; border-radius:2px;
+  background:rgba(31,95,208,.06);
+  box-shadow:inset 0 0 0 1px rgba(31,95,208,.10);
+}
+
+/* =============================================================
+   2. 第二屏 —— 磁吸板
+   ============================================================= */
+.work{
+  height:100vh; min-height:640px;
+  position:relative;
+  background:
+    radial-gradient(60% 45% at 24% -4%, rgba(255,255,255,.72), transparent 62%),
+    radial-gradient(70% 60% at 96% 104%, rgba(78,104,138,.30), transparent 58%),
+    var(--band);
+}
+.board{
+  position:absolute; inset:26px;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #ffffff, transparent 55%),
+    var(--plate);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:
+    0 0 0 1px rgba(24,40,62,.13),
+    0 40px 70px -40px rgba(20,36,58,.70),
+    0 2px 0 rgba(255,255,255,.9) inset;
+  border-radius:3px;
+  overflow:hidden;
+}
+.board::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image:radial-gradient(circle at 1px 1px, rgba(20,34,52,.14) 1px, transparent 0);
+  background-size:14px 14px;
+  mask-image:radial-gradient(130% 120% at 50% 40%, #000 30%, transparent 82%);
+}
+.b-head{
+  position:absolute; left:38px; right:38px; top:26px;
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:10px; letter-spacing:.26em; color:var(--dim); text-transform:uppercase;
+  z-index:5;
+}
+.b-head .l{ display:flex; align-items:center; gap:12px; }
+.b-head .l b{ color:var(--ink-2); font-weight:600; letter-spacing:.22em; }
+.b-head .l i{ width:26px; height:1px; background:var(--line); }
+.b-head .r{ font-variant-numeric:tabular-nums; letter-spacing:.18em; }
+
+/* 板面内容画布：按 1440×900 视口下的板面实际尺寸设计，整体等比缩放适配任意窗口 */
+.b-canvas{
+  position:absolute; left:50%; top:50%; width:1388px; height:848px;
+  transform:translate(-50%,-50%) scale(var(--bs,1));
+  transform-origin:50% 50%;
+}
+.b-col{
+  position:absolute; left:44px; top:392px; width:330px;
+  transform:translateY(-50%);
+  z-index:5;
+}
+.b-col .name{ font-size:11px; letter-spacing:.3em; color:var(--dim); text-transform:uppercase; }
+.b-col h2{
+  font-size:38px; line-height:1.26; font-weight:600;
+  letter-spacing:-.025em; margin-top:14px; text-wrap:balance;
+}
+.b-col h2 em{ font-style:normal; color:var(--blue); }
+.b-col .claim{
+  margin-top:16px; font-size:12.5px; line-height:2; color:var(--ink-2); max-width:25em;
+}
+.b-rule{ height:1px; background:var(--line); margin-top:24px; }
+.b-facts{ display:flex; gap:30px; margin-top:16px; }
+.b-facts b{
+  display:block; font-size:22px; font-weight:600; letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+.b-facts span{ font-size:9.5px; letter-spacing:.16em; color:var(--dim); }
+
+.stage2{ position:absolute; inset:0; }
+.card{
+  position:absolute; width:299px; color:inherit;
+  background:var(--card);
+  border-radius:2px;
+  padding:8px 8px 0;
+  box-shadow:
+    0 0 0 1px rgba(20,34,52,.10),
+    0 2px 3px rgba(var(--shadow-c),.13),
+    0 3px 6px -2px rgba(var(--shadow-c),.10),
+    0 22px 34px -18px rgba(var(--shadow-c),.38);
+  transition:transform .55s var(--ease-out), box-shadow .55s var(--ease-out), opacity .4s ease;
+  cursor:pointer;
+  will-change:transform;
+}
+.card img{
+  width:100%; aspect-ratio:16/11; object-fit:cover; object-position:top center;
+  border-radius:1px; box-shadow:inset 0 0 0 1px rgba(20,34,52,.08);
+}
+.card .cbody{ padding:12px 4px 14px; }
+.card .ctop{ display:flex; justify-content:space-between; align-items:baseline; }
+.card .cnum{ font-size:9.5px; letter-spacing:.2em; color:var(--dim); font-variant-numeric:tabular-nums; }
+.card .go{ font-size:9.5px; letter-spacing:.14em; color:var(--blue); opacity:0; transform:translateX(-4px); transition:all .35s ease; }
+.card h3{ font-size:14px; font-weight:600; margin:6px 0 5px; letter-spacing:-.005em; }
+.card p{ font-size:11.5px; line-height:1.68; color:var(--dim); }
+
+.c1{ left:400px; top:108px; transform:rotate(-2deg); }
+.c2{ left:725px; top:196px; transform:rotate(1.4deg); }
+.c3{ left:1050px; top:284px; transform:rotate(-1deg); }
+.c4{ left:400px; top:446px; transform:rotate(1.2deg); }
+.c5{ left:725px; top:538px; transform:rotate(-1.6deg); }
+
+@media (hover:hover){
+  .card:hover{
+    transform:rotate(0) translateY(-8px);
+    box-shadow:
+      0 0 0 1px rgba(31,95,208,.30),
+      0 2px 4px rgba(var(--shadow-c),.10),
+      0 34px 52px -20px rgba(var(--shadow-c),.42);
+    z-index:6;
+  }
+  .card:hover .go{ opacity:1; transform:none; }
+}
+.card:focus-visible{ outline:2px solid var(--blue); outline-offset:3px; }
+
+.pin{
+  position:absolute; left:50%; top:-8px; width:16px; height:16px; margin-left:-8px;
+  border-radius:50%; z-index:3;
+  background:radial-gradient(circle at 36% 30%, #ffffff 0%, #cfdae6 42%, #94a6ba 100%);
+  box-shadow:0 1px 2px rgba(16,28,44,.35), 0 6px 10px -4px rgba(16,28,44,.30);
+}
+.ghost{
+  position:absolute; left:400px; top:648px; width:949px;
+  border:1px dashed rgba(20,34,52,.20); border-radius:2px;
+  padding:18px 24px;
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:10.5px; letter-spacing:.16em; color:var(--dim);
+  background:rgba(255,255,255,.34);
+}
+.ghost b{ color:var(--ink-2); font-weight:500; letter-spacing:.1em; }
+
+.card{ width:299px; }
+
+.b-foot{
+  position:absolute; left:38px; right:38px; bottom:22px;
+  display:flex; justify-content:space-between; align-items:center;
+  padding-top:12px; border-top:1px solid var(--line);
+  font-size:10px; letter-spacing:.14em; color:var(--dim);
+  z-index:5;
+}
+.b-foot .fr{ display:flex; align-items:center; gap:8px; }
+.b-foot .fr i{ width:22px; height:1px; background:rgba(20,34,52,.3); }
+.b-foot b{ color:var(--ink-2); font-weight:500; }
+
+/* 转场期间：文字与次要卡退场 */
+.work[data-phase="opening"] .b-head,
+.work[data-phase="opening"] .b-col,
+.work[data-phase="opening"] .b-foot,
+.work[data-phase="opening"] .ghost{ opacity:0; transition:opacity .4s ease .24s; }
+.work[data-phase="closing"] .b-head,
+.work[data-phase="closing"] .b-col,
+.work[data-phase="closing"] .b-foot,
+.work[data-phase="closing"] .ghost{ opacity:1; transition:opacity .3s ease .2s; }
+.b-head,.b-col,.b-foot,.ghost{ transition:opacity .3s ease; }
+
+.work[data-phase="opening"] .card:not(.active){
+  opacity:0; scale:.94;
+}
+.work[data-phase="opening"] .card:nth-of-type(1):not(.active){ transform:translate(-30px,-10px) rotate(-2deg); transition-delay:.05s; }
+.work[data-phase="opening"] .card:nth-of-type(2):not(.active){ transform:translate(0,36px) rotate(1.4deg); transition-delay:.09s; }
+.work[data-phase="opening"] .card:nth-of-type(3):not(.active){ transform:translate(32px,10px) rotate(-1deg); transition-delay:.13s; }
+
+/* =============================================================
+   3. 第三屏 —— 项目详情（B 站式：顶栏 + 左播放器 + 右栏）
+   ============================================================= */
+.detail{
+  position:fixed; inset:0; z-index:30;
+  display:none;
+  background:var(--bg-top);
+  opacity:0; transform:scale(.985);
+  transition:opacity .28s ease, transform .28s var(--ease-out);
+  pointer-events:none;
+}
+.detail[data-state="open"], .detail[data-state="anim"]{ display:flex; flex-direction:column; }
+.detail[data-state="open"]{ opacity:1; transform:none; pointer-events:auto; }
+
+/* 顶栏 */
+.dt-nav{
+  flex:none; height:54px;
+  display:flex; align-items:center; gap:22px;
+  padding:0 26px;
+  background:rgba(255,255,255,.78);
+  box-shadow:0 1px 0 var(--line);
+  backdrop-filter:blur(10px);
+  position:relative; z-index:6;
+}
+.dt-back{
+  font-size:11px; letter-spacing:.18em; color:var(--ink-2);
+  text-transform:uppercase;
+  display:flex; align-items:center; gap:10px;
+}
+.dt-back i{ width:20px; height:1px; background:rgba(20,34,52,.32); transition:transform .3s var(--ease-out); }
+.dt-back:hover{ color:var(--ink); }
+.dt-back:hover i{ transform:translateX(-4px); }
+.dt-crumbs{ font-size:11px; letter-spacing:.08em; color:var(--dim); display:flex; align-items:center; gap:9px; }
+.dt-crumbs i{ opacity:.5; font-style:normal; }
+.dt-crumbs b{ color:var(--ink); font-weight:500; }
+.dt-navbadge{
+  margin-left:auto;
+  font-size:9.5px; letter-spacing:.16em; color:var(--green);
+  padding:4px 10px; border:1px solid rgba(47,158,106,.35); border-radius:99px;
+}
+
+/* 主体两栏 */
+.dt-main{ flex:1; min-height:0; display:flex; }
+.dt-left{
+  flex:1; min-width:0; overflow-y:auto;
+  padding:24px 30px 48px;
+}
+.dt-left-in{ max-width:1180px; margin:0 auto; }
+
+/* 播放器：16:9 黑框，iframe 内部 1440×810 等比铺满；手机应用切竖屏比例 */
+.player{
+  position:relative; aspect-ratio:16/9;
+  background:#0b0f16;
+  border-radius:10px; overflow:hidden;
+  box-shadow:0 0 0 1px rgba(20,34,52,.16), 0 34px 70px -34px rgba(16,36,62,.55);
+}
+.player.phone{
+  aspect-ratio:390/780;
+  height:min(76vh, 780px);
+  width:auto;
+  margin:0 auto;
+  border-radius:22px;
+}
+.player.phone .p-bar{ display:none; }
+.player iframe{
+  position:absolute; left:0; top:0;
+  width:1440px; height:810px;
+  border:0; transform-origin:0 0;
+  background:#fff;
+}
+.player .shot{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:top center;
+}
+.player .p-bar{
+  position:absolute; left:0; right:0; bottom:0; z-index:4;
+  display:flex; align-items:center; justify-content:flex-start; gap:12px;
+  padding:22px 16px 9px;
+  background:linear-gradient(transparent, rgba(6,10,18,.62));
+  color:#d6dee9; font-size:10px; letter-spacing:.08em;
+  font-variant-numeric:tabular-nums;
+  pointer-events:none;
+}
+.player .p-bar .live{ display:flex; align-items:center; gap:6px; color:#7fe0ae; letter-spacing:.14em; }
+.player .p-bar .live i{ width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 0 3px rgba(47,158,106,.25); }
+
+/* 全屏按钮：地址条上的小透明键，指针事件单独放行 */
+.player .p-bar .fs-btn{
+  pointer-events:auto;
+  margin-left:auto; flex:none;
+  border:1px solid rgba(214,222,233,.30);
+  background:rgba(12,20,32,.34);
+  color:#d6dee9; font-size:10px; letter-spacing:.10em; line-height:1;
+  padding:4px 10px; border-radius:3px; cursor:pointer;
+  transition:background .2s ease, border-color .2s ease, color .2s ease;
+}
+.player .p-bar .fs-btn:hover{
+  background:rgba(214,222,233,.18);
+  border-color:rgba(214,222,233,.62); color:#fff;
+}
+.player .p-bar .fs-btn:focus-visible{ outline:1px solid #7fe0ae; outline-offset:2px; }
+
+/* 全屏态：铺满屏幕、去圆角；地址条收成右下角一颗退出键，不压应用内容 */
+.player:fullscreen{
+  width:100vw; height:100vh;
+  aspect-ratio:auto; border-radius:0;
+  background:#070b11;
+}
+.player:fullscreen .p-bar{
+  left:auto; right:20px; bottom:16px;
+  padding:0; background:none;
+}
+.player:fullscreen .p-bar #dt-addr,
+.player:fullscreen .p-bar .live{ display:none; }
+.player:fullscreen .p-bar .fs-btn{
+  font-size:11px; padding:6px 13px;
+  background:rgba(12,20,32,.55);
+  backdrop-filter:blur(4px);
+  border-color:rgba(214,222,233,.4);
+}
+
+/* 手机应用平时不显示地址条，全屏时单独放出右上角的退出键，避免无处可退 */
+.player.phone:fullscreen .p-bar{
+  display:flex; left:auto; right:18px; top:18px; bottom:auto;
+  padding:0; background:none;
+}
+.player.phone:fullscreen .p-bar #dt-addr,
+.player.phone:fullscreen .p-bar .live{ display:none; }
+.player.phone:fullscreen .p-bar .fs-btn{
+  margin-left:0;
+  background:rgba(12,20,32,.55);
+  backdrop-filter:blur(4px);
+}
+
+/* 加载态：登录页截图铺底（不透明直接显示，绝不露 iframe 白底）；
+   消失走淡出（等 iframe 画完第一帧再撤，交叉淡入真身） */
+.dt-loading{
+  position:absolute; inset:0; z-index:5;
+  display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  background:#0b0f16 center/cover no-repeat;
+  transition:opacity .3s ease;
+}
+.dt-loading::before{
+  content:""; position:absolute; inset:0;
+  background:rgba(8,12,20,.22);
+}
+.dt-loading .spin{
+  position:relative; width:26px; height:26px; border-radius:50%;
+  border:2px solid rgba(255,255,255,.3); border-top-color:#fff;
+  animation:spin .9s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(1turn); } }
+.dt-loading b{
+  position:relative; font-size:11px; letter-spacing:.2em; color:#fff; font-weight:500;
+  background:rgba(10,15,25,.72); padding:7px 14px; border-radius:999px;
+  display:flex; align-items:center; gap:10px;
+}
+
+/* 标题与简介（播放器下方） */
+.dt-title{ margin-top:18px; }
+.dt-title h2{ font-size:22px; font-weight:600; letter-spacing:-.01em; line-height:1.3; }
+.dt-title .sub{ font-size:12px; color:var(--dim); letter-spacing:.05em; margin-top:6px; }
+.dt-nums{ display:flex; gap:34px; padding:16px 0 4px; }
+.dt-nums div b{
+  display:block; font-size:21px; font-weight:600; letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums;
+}
+.dt-nums div span{ font-size:9px; letter-spacing:.12em; color:var(--dim); }
+.dt-sec{ margin-top:22px; }
+.dt-sec h3{
+  font-size:9.5px; letter-spacing:.26em; color:var(--dim); text-transform:uppercase;
+  padding-bottom:8px; border-bottom:1px solid var(--line);
+  font-weight:500;
+}
+.dt-dec{ list-style:none; }
+.dt-dec li{
+  padding:11px 0 10px; border-bottom:1px solid var(--line-soft);
+  font-size:12px; line-height:1.8; color:var(--ink-2);
+}
+.dt-dec li b{ color:var(--ink); font-weight:600; }
+
+/* 右栏：引导 + 换个项目看（相关推荐样式） */
+.dt-side{
+  width:360px; flex:none; overflow-y:auto;
+  padding:24px 22px 48px;
+  background:rgba(255,255,255,.55);
+  box-shadow:inset 1px 0 0 var(--line);
+}
+.dt-guide{ list-style:none; counter-reset:g; margin-top:4px; }
+.dt-guide li{
+  counter-increment:g;
+  display:grid; grid-template-columns:26px 1fr; gap:10px;
+  padding:10px 12px; margin-top:8px;
+  background:#fff; border-radius:6px;
+  box-shadow:0 0 0 1px rgba(20,34,52,.07);
+  font-size:11.5px; line-height:1.65; color:var(--ink-2);
+  cursor:pointer;
+  transition:box-shadow .25s ease;
+}
+.dt-guide li:hover{ box-shadow:0 0 0 1px rgba(31,95,208,.35); }
+.dt-guide li::before{
+  content:counter(g,decimal-leading-zero);
+  font-size:10px; color:var(--dim); letter-spacing:.08em;
+  padding-top:2px; font-variant-numeric:tabular-nums;
+}
+.dt-guide li b{ color:var(--ink); font-weight:600; }
+.dt-guide li.on::before{ color:var(--blue); }
+.dt-guide li.on{ box-shadow:0 0 0 1px rgba(31,95,208,.45); }
+
+.dt-more{ margin-top:10px; display:flex; flex-direction:column; gap:10px; }
+.dt-more button{
+  display:grid; grid-template-columns:132px 1fr; gap:12px;
+  text-align:left; background:#fff; border-radius:6px; padding:6px;
+  box-shadow:0 0 0 1px rgba(20,34,52,.08);
+  transition:transform .3s var(--ease-out), box-shadow .3s ease;
+}
+.dt-more button:hover{ transform:translateX(4px); box-shadow:0 0 0 1px rgba(31,95,208,.4); }
+.dt-more img{ width:132px; aspect-ratio:16/9; object-fit:cover; object-position:top center; border-radius:4px; }
+.dt-more .mtxt{ padding:4px 6px 4px 0; min-width:0; }
+.dt-more .mtxt b{ display:block; font-size:12px; font-weight:600; color:var(--ink); letter-spacing:.01em; }
+.dt-more .mtxt span{ display:block; font-size:10px; color:var(--dim); margin-top:5px; line-height:1.55; }
+
+/* =============================================================
+   4. 全局
+   ============================================================= */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ transition-duration:.01ms !important; animation-duration:.01ms !important; }
+  html{ scroll-behavior:auto; }
+}
+@media (max-width:1100px){
+  .stage{ display:flex; flex-direction:column; height:auto; min-height:100vh; padding:32px 22px; }
+  .s-canvas{ position:static; width:auto; height:auto; padding:0; transform:none; }
+  .me{ width:100%; }
+  .caps{ margin-left:0; margin-top:26px; }
+  .cap{ min-height:64px; }
+  .work{ height:auto; min-height:100vh; padding:60px 0; }
+  .board{ position:relative; inset:auto; margin:0 16px; height:calc(100vh - 60px); }
+}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ═══════════ 第一屏 ═══════════ -->
+<section class="stage" id="top" aria-label="自我介绍">
+ <div class="s-canvas">
+
+  <aside class="me">
+    <div class="me-top">
+      <img class="photo" src="/media/jianyu.png" alt="朱建宇证件照" width="104" height="140" />
+      <div>
+        <div class="kicker">AI Product · Class of 2028</div>
+        <h1>朱建宇</h1>
+        <p class="idline">AI 产品 · 能自己把产品做出来</p>
+      </div>
+    </div>
+
+    <ul class="soft">
+      <li><span class="k">学校</span><span class="v"><b>广东工业大学</b> · 大数据管理与应用 · 2024 级本科（2028.06 毕业）<br>主修：大数据分析 / Python / 数据库</span></li>
+      <li><span class="k">现状</span><span class="v">广州 · 每周到岗 5 天 · 可实习 3 个月以上<br>正在找 <b>2028 届 AI 产品方向实习</b></span></li>
+      <li><span class="k">MBTI</span><span class="v"><b>ENTP</b> · 辩论家——外向 92%、天马行空 79%、<br>理性思考 84%、随机应变 85%、自信果断 97%</span></li>
+      <li><span class="k">优势</span><span class="v"><b>产品、开发、市场、销售、运营，五个环节都自己跑过</b>：3 个 AI 产品独立交付，社群从 0 做到 627 人、转化 20%；跟业务方聊得清需求，也自己写得完代码，多线并行扛得住。</span></li>
+    </ul>
+
+    <div class="soft-block">
+      <div class="sb-t">Experience · 四条经历线</div>
+      <ul class="sums">
+        <li><b>产品</b>掌动智能 5 个月实习交付 3 个 AI 产品：21 项功能拆 35 轮上线、76 个缺陷拦在交付前，每步留可核对的交付物。</li>
+        <li><b>开发</b>自己的方案自己能实现：26,625 行原生 JS 画布、6,869 行 Python 编排内核，77 项 pytest 全过。</li>
+        <li><b>运营</b>从 0 建起 6 个社群 627 人，1 对 1 触达 1,400+，转化 20%（口径：私聊触达并成交）。</li>
+        <li><b>市场</b>抖音直播 3 天引流 300+；自建校园自媒体矩阵约 7k 好友、社群覆盖龙洞校区约七成，小红书单篇最高 16 万浏览。</li>
+      </ul>
+    </div>
+
+    <div class="me-bottom">
+      <div class="contact">
+        <span class="num">18402005173</span>
+        <span>18402005173@163.com</span>
+      </div>
+      <div class="scroll-hint"><i></i><span>往下 · 五件可操作的作品</span></div>
+    </div>
+  </aside>
+
+  <div class="caps" id="caps">
+
+    <section class="cap" data-cap="product" data-open="1" style="--g:4" aria-label="产品能力">
+      <button class="cap-head" aria-expanded="true">
+        <span class="cap-idx">01</span>
+        <span class="cap-title">产品</span>
+        <span class="cap-one">5 个月实习 · 3 个 AI 产品 · 从竞品定位到验收</span>
+        <span class="cap-sign">＋</span>
+      </button>
+      <div class="cap-body">
+        <div class="tline">
+          <div class="trow">
+            <span class="y">2026.04 — 09</span>
+            <div class="w"><b>掌动智能 · AI 产品工程师（实习）</b>
+              <p>业务方给一句初始需求，方案、范围、实现、验收由同一人走完——五个月里这条路走了三遍，交付 <em>3 个 AI 产品</em>。</p></div>
+          </div>
+          <div class="trow">
+            <span class="y">2026.04 — 09</span>
+            <div class="w"><b>21 项功能 · 35 轮交付 · 8 批验收</b>
+              <p>7 周里每轮先锁定下一轮的接口、字段与页面清单；15 维 99 项功能分 <em>8 批独立验收</em>，<em>76 个缺陷</em>拦在交付前、分四批收敛。</p></div>
+          </div>
+          <div class="trow">
+            <span class="y">2026.09 —</span>
+            <div class="w"><b>13 项候选只留 5 项 · 自研多智能体协作交付引擎</b>
+              <p>先定形态再定功能：开源单机工具，多租户、计费、灰度与 A/B 全部砍掉——<em>范围由形态反推，不靠堆叠</em>。</p></div>
+          </div>
+        </div>
+        <div class="cap-chips">
+          <span class="chip">需求访谈归类</span><span class="chip">竞品替代层定位</span><span class="chip">不做清单</span>
+          <span class="chip">范围取舍</span><span class="chip">指标口径</span><span class="chip">验收前置</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cap" data-cap="dev" style="--g:1" aria-label="开发能力">
+      <button class="cap-head" aria-expanded="false">
+        <span class="cap-idx">02</span>
+        <span class="cap-title">开发</span>
+        <span class="cap-one">26,625 行 JS 画布 · 6,869 行 Python 内核 · 自己写得出</span>
+        <span class="cap-sign">＋</span>
+      </button>
+      <div class="cap-body">
+        <div class="tline">
+          <div class="trow">
+            <span class="y">2026.04 — 09</span>
+            <div class="w"><b>三个平台 · 产品与前端一手实现</b>
+              <p>AgentBuild 画布交互用 <em>26,625 行原生 JS</em> 直达 DOM；教学平台 <em>10 天交付初版</em>（后端 9 个模块 2,588 行、前端 16 页）；NextRAG 桌面端选 Tauri 弃 Electron，省下 100MB Chromium。</p></div>
+          </div>
+          <div class="trow">
+            <span class="y">2026.09 —</span>
+            <div class="w"><b>多智能体协作交付引擎 · 已开源</b>
+              <p>后端 <em>6,869 行 Python</em>、前端 <em>4,048 行 TypeScript</em>，编排跑在事件驱动状态机上；<em>77 项 pytest</em> 与构建、lint 全过，附幂等安装、真实启动、冲突演示三个可复现脚本。</p></div>
+          </div>
+        </div>
+        <div class="cap-chips">
+          <span class="chip">Python</span><span class="chip">TypeScript</span><span class="chip">Go</span>
+          <span class="chip">原生 JS 画布</span><span class="chip">事件驱动状态机</span><span class="chip">Tauri 桌面端</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cap" data-cap="ops" style="--g:1" aria-label="运营能力">
+      <button class="cap-head" aria-expanded="false">
+        <span class="cap-idx">03</span>
+        <span class="cap-title">运营</span>
+        <span class="cap-one">0 起步 627 人社群 · 转化 20% · 销售额 4 万余元</span>
+        <span class="cap-sign">＋</span>
+      </button>
+      <div class="cap-body">
+        <div class="tline">
+          <div class="trow">
+            <span class="y">2025.10 — 26.02</span>
+            <div class="w"><b>掌上大学 · 校内员工（社群运营）</b>
+              <p>接手时社群为 0，离任时 6 个群 <em>627 人</em>；1 对 1 私聊触达 <em>1,400+</em>、转化 <em>20%</em>（口径：私聊触达并成交），沉淀复购客户 200+、累计销售额 4 万余元；建群、内容排期与话术库由本人从 0 搭起。</p></div>
+          </div>
+          <div class="trow">
+            <span class="y">2025.06 —</span>
+            <div class="w"><b>小米校园俱乐部 · 运营部长兼活动副部长</b>
+              <p>线下产品体验活动从策划、宣发到落地一人跟完，单场参与 <em>200+</em>；招新季触达 <em>1,000+</em> 学生，按筛选标准招入核心社员十余人，执行方案复盘后可复用。</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cap" data-cap="mkt" style="--g:1" aria-label="市场能力">
+      <button class="cap-head" aria-expanded="false">
+        <span class="cap-idx">04</span>
+        <span class="cap-title">市场</span>
+        <span class="cap-one">抖音 3 天引流 300+ · 自建账号单篇 16 万浏览</span>
+        <span class="cap-sign">＋</span>
+      </button>
+      <div class="cap-body">
+        <div class="tline">
+          <div class="trow">
+            <span class="y">2024.11 — 25.10</span>
+            <div class="w"><b>高顿教育 · 驻校 → 市场部</b>
+              <p>抖音新生答疑直播 3 天引流 <em>300+</em> 精准用户；宣讲与摆点覆盖 <em>2,000+</em> 意向学生、转化 <em>400+</em>；自建曝光—点击—留资—到访四段漏斗，每个渠道落到一个到访成本。</p></div>
+          </div>
+          <div class="trow">
+            <span class="y">2025.06 —</span>
+            <div class="w"><b>字节跳动 & 小米 · 校园合伙人 / 运营部长</b>
+              <p>承接 4 个校招社群 <em>605 人</em>，按届别与岗位分群、按周回溯数据调节奏；在 7 个品牌社群、1,000+ 人范围发起产品问题征集，回收 <em>150+ 条</em>反馈，归为三类后把答复前置进群引导。</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+ </div>
+</section>
+
+<!-- ═══════════ 第二屏 · 磁吸板 ═══════════ -->
+<section class="work" id="work" data-phase="idle" aria-label="项目演示">
+  <div class="board">
+    <div class="b-head">
+      <div class="l"><b>Board</b><i></i><span>五件作品 · 打开就能点</span></div>
+      <div class="r num">2024 — 2026 / 05 WORKS</div>
+    </div>
+
+    <div class="b-canvas">
+    <div class="b-col">
+      <div class="name">Selected Works · 可操作</div>
+      <h2>上三项实习交付<br>下两项自研自用<br>可<em>点击</em>进入体验</h2>
+      <p class="claim">前三件是在掌动智能期间交付的三个 AI 产品，从<em>需求分析、产品设计到功能开发，全由我独立完成</em>。后两件是为了让自己干活更顺手写的工具；岗位需要的话，我可以很快把需要的工具做出来。</p>
+      <div class="b-rule"></div>
+      <div class="b-facts">
+        <div><b>5</b><span>件可操作作品</span></div>
+        <div><b>3</b><span>个内部上线</span></div>
+        <div><b>0</b><span>账号门槛</span></div>
+      </div>
+    </div>
+
+    <div class="stage2">
+      <article class="card c1" data-key="agentbuild" tabindex="0" role="button" aria-label="打开 AgentBuild 演示">
+        <span class="pin" aria-hidden="true"></span>
+        <img src="/media/posters/agentbuild.jpg" alt="AgentBuild 界面截图" />
+        <div class="cbody">
+          <div class="ctop"><span class="cnum">01 / 2026</span><span class="go">OPEN →</span></div>
+          <h3>AgentBuild · 智能体开发平台</h3>
+          <p>给不会写代码的员工：对话生成工作流，21 项功能 7 周 35 轮交付上线。</p>
+        </div>
+      </article>
+
+      <article class="card c2" data-key="ai-teaching" tabindex="0" role="button" aria-label="打开 AI 开发教学平台演示">
+        <span class="pin" aria-hidden="true"></span>
+        <img src="/media/posters/teaching.jpg" alt="AI 开发教学平台界面截图" />
+        <div class="cbody">
+          <div class="ctop"><span class="cnum">02 / 2026</span><span class="go">OPEN →</span></div>
+          <h3>AI 开发教学平台</h3>
+          <p>10 天交付的可开课系统：评过程不评答案，AI 初评不动教师终评。</p>
+        </div>
+      </article>
+
+      <article class="card c3" data-key="nextrag" tabindex="0" role="button" aria-label="打开 NextRAG 演示">
+        <span class="pin" aria-hidden="true"></span>
+        <img src="/media/posters/nextrag.jpg" alt="NextRAG 界面截图" />
+        <div class="cbody">
+          <div class="ctop"><span class="cnum">03 / 2026</span><span class="go">OPEN →</span></div>
+          <h3>NextRAG · 材料审阅问答</h3>
+          <p>给财会这类「错一字即事故」的场景：宁可答不出，引用对到文件行号。</p>
+        </div>
+      </article>
+
+      <article class="card c4" data-key="msserver" tabindex="0" role="button" aria-label="打开总指挥部看板截图">
+        <span class="pin" aria-hidden="true"></span>
+        <img src="/media/posters/msserver.jpg" alt="总指挥部看板截图" />
+        <div class="cbody">
+          <div class="ctop"><span class="cnum">04 / 2026</span><span class="go">OPEN →</span></div>
+          <h3>总指挥部 · 多智能体协作交付引擎</h3>
+          <p>自研开源：同一文件冲突自动裁决，验收零 token，77 项 pytest 全过。</p>
+        </div>
+      </article>
+
+      <article class="card c5" data-key="prism" tabindex="0" role="button" aria-label="打开棱镜高保真界面">
+        <span class="pin" aria-hidden="true"></span>
+        <img src="/media/posters/prism.jpg" alt="棱镜 App 界面" />
+        <div class="cbody">
+          <div class="ctop"><span class="cnum">05 / 2026</span><span class="go">OPEN →</span></div>
+          <h3>棱镜 · 手机远程 AI 编程</h3>
+          <p>手机下指令、主机执行回传；双模式接入，零第三方构建依赖。</p>
+        </div>
+      </article>
+    </div>
+    </div>
+
+    <div class="b-foot">
+      <span>演示数据在浏览器里跑 · 不用注册 · 刷新即回初始数据</span>
+      <span class="fr"><i></i>每一件都<b>能上手点</b></span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 第三屏 · 项目详情（B 站式） ═══════════ -->
+<div class="detail" id="detail" data-state="closed" aria-hidden="true">
+  <header class="dt-nav">
+    <button class="dt-back" id="dt-back"><i></i><span>回到项目板</span></button>
+    <nav class="dt-crumbs"><span>主页</span><i>/</i><span>作品</span><i>/</i><b id="dt-crumbs-cur">—</b></nav>
+    <span class="dt-navbadge" id="dt-badge">打开即用</span>
+  </header>
+
+  <div class="dt-main">
+    <div class="dt-left">
+      <div class="dt-left-in">
+        <div class="player" id="dt-player">
+          <iframe id="dt-frame" title="项目演示" src="about:blank"></iframe>
+          <img class="shot" id="dt-shot" alt="真实运行截图" style="display:none" />
+          <div class="dt-loading" id="dt-loading"><span class="spin"></span><b>正在拉起真实应用</b></div>
+          <div class="p-bar">
+            <span id="dt-addr">localhost:8787</span>
+            <span class="live"><i></i>实时可点</span>
+            <button class="fs-btn" id="dt-fs" type="button" aria-label="全屏查看演示">全屏</button>
+          </div>
+        </div>
+
+        <div class="dt-title">
+          <h2 id="dt-name">—</h2>
+          <p class="sub" id="dt-sub">—</p>
+        </div>
+
+        <div class="dt-nums" id="dt-nums"></div>
+
+        <section class="dt-sec">
+          <h3>怎么做的 · 从定位到验收</h3>
+          <ul class="dt-dec" id="dt-dec"></ul>
+        </section>
+      </div>
+    </div>
+
+    <aside class="dt-side">
+      <section class="dt-sec" style="margin-top:0">
+        <h3>上手路线 · 从上往下点</h3>
+        <ol class="dt-guide" id="dt-guide"></ol>
+      </section>
+
+      <section class="dt-sec">
+        <h3>接着看下一件</h3>
+        <div class="dt-more" id="dt-more"></div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   数据：五个项目（预设引导 / 关键决策 / 结果数字）
+   ═══════════════════════════════════════════════ */
+const PROJECTS = {
+  "agentbuild": {
+    name: "AgentBuild · 智能体开发平台",
+    short: "AgentBuild",
+    sub: "实习交付 · 给没有技术部门的公司：员工对话生成工作流，21 项功能 35 轮上线",
+    url: "/apps/agentbuild/index.html",
+    poster: "/media/posters/agentbuild.jpg",
+    boot: "/media/posters/boot-agentbuild.jpg",
+    guide: [
+      { t: "登录", d: "账号已预填（18402005173@163.com），点「登 录」直接进工作台。" },
+      { t: "跟引导条走", d: "从首页进画布，底部浮出引导条：模板 → 试运行 → 发布，一条线三步。" },
+      { t: "先看搭好的模板", d: "「项目管理」打开「客服工单分诊」：四个节点已连好，点「分类」节点能看提示词。" },
+      { t: "跑一遍试运行", d: "输入框里是一条真实工单，点试运行，各节点的输入输出在画布上逐个点亮。" },
+      { t: "发布成应用", d: "发布后生成版本号与调用次数——这就是交付验收的依据。" }
+    ],
+    decisions: [
+      "<b>需求调研：</b>访谈运营、产品岗等重复动作密集的角色，高频场景收在转发通知、固定群运营、日报周报三类——共性是规则稳定、可交给工作流。以零技术基础用户为基准跑通全流程，入口从画布前移到对话生成。",
+      "<b>竞品定位：</b>按用户摊开四类竞品而非按品类比价：画布编排、成品 Agent、办公内嵌、框架；空位判定为「非技术员工在内部自建并托管工作流」。五款开源底座逐一比对授权条款，排除禁改 LOGO 的 Dify，选定 Apache 2.0 的 Coze Studio，189 行选型报告逐条标注证据等级。",
+      "<b>取舍边界：</b>21 项功能拆 35 轮交付，每轮先定验收清单与边界，计费、移动端、语音、国际化明确暂缓；每个维度强制产出一份四栏不做清单——先定不做什么，再定做什么。",
+      "<b>实现路径：</b>画布交互为 26,625 行原生 JS：拖拽、连线吸附、缩放平移直达 DOM，新增节点先在类型表登记输入输出、连线即校验。前端骨架验收通过后仍整版废弃重做，两次返工均由我判定。",
+      "<b>交付验收：</b>自定三条审查红线（零代码改动、零提交、独立账号只读），59 项静态审查加真实运行拦下 76 个缺陷；190 项 pytest 与 83 条浏览器脚本锁住回归。交付用户、部署两份接手文档，非技术同事照文档能跑通全流程。"
+    ],
+    nums: [["21", "项功能 · 35 轮交付"], ["76", "个缺陷拦在交付前"], ["190", "项 pytest 回归底线"]]
+  },
+  "ai-teaching": {
+    name: "AI 开发教学平台",
+    short: "AI 教学平台",
+    sub: "实习交付 · 高校 AI 编程教学系统：评过程不评答案，10 天交付可开课初版",
+    url: "/apps/ai-teaching/index.html",
+    poster: "/media/posters/teaching.jpg",
+    boot: "/media/posters/boot-teaching.jpg",
+    guide: [
+      { t: "登录", d: "账号密码已预填（zhangqm），点「登录」进教师视角。" },
+      { t: "先看教学概览", d: "教师首页一屏看完本周任务：科目数、待评分、学生总数与置顶推荐。" },
+      { t: "科目编辑三页签", d: "科目管理打开「Python 数据分析基础」：科目架构、课程编辑、按班级一键分配。" },
+      { t: "AI 批量评分", d: "「作业管理」跑一次批量评分再人工复核：AI 只给初评建议，教师终评不动。" },
+      { t: "切学生视角", d: "点底部引导条「切学生视角」，用学生身份核对提交与评分，两端数据一致。" }
+    ],
+    decisions: [
+      "<b>教学定位：</b>需求方十分钟口述、没有需求文档——据此自行拓展场景与边界，独立完成整套产品设计。教学缺口定为「学生能生成代码，但不掌握工程规范」，目标拆三层：跑通工具环境、写出合规代码、按 Git 流程协作；软件、环境、账号与示例工程固化成配置清单，一次配齐。",
+      "<b>结构设计：</b>首版把学生、教师、管理员设为三个并列身份，方案整体推翻，改为按组织关系建模——学生属班级、班级属老师，权限由关系推导、不逐个审批。班级独立成层，发布、提交与批改按班级隔离。",
+      "<b>规则设计：</b>作业没有标准答案，就把评分标准前置到建课、批改只做确认，对标 Moodle 冻结标准与 Open edX 保留评分版本。考核对象是过程：对话记录、生成代码与效果截图；AI 初评与教师终评两个字段并存、互不覆盖。",
+      "<b>工程交付：</b>10 天交付初版：FastAPI 后端 9 个业务模块 2,588 行、前端 16 个页面、12 套预置课件，建课到出分全链路可跑通；随领导向管理层宣讲定位后，交由教学部门承接课程设计。"
+    ],
+    nums: [["10", "天交付可开课初版"], ["2,588", "行后端 · 9 个业务模块"], ["16", "个页面 · 12 套预置课件"]]
+  },
+  "nextrag": {
+    name: "NextRAG · 材料审阅问答",
+    short: "NextRAG",
+    sub: "实习交付 · 财会等「错一字即事故」的场景：宁可答不出，不可答错",
+    url: "/apps/nextrag/index.html",
+    poster: "/media/posters/nextrag.jpg",
+    boot: "/media/posters/boot-nextrag.jpg",
+    guide: [
+      { t: "登录", d: "账号密码已预填（18402005173@163.com），点「登 录」直接进。" },
+      { t: "看知识怎么进来", d: "点文件库「+」，预置的《差旅费管理办法 v3.3》自动完成上传与切片转换。" },
+      { t: "发一个真问题", d: "发送预置的「差旅报销的审批流程是什么」：规划、读取、检索、摘要逐个点亮。" },
+      { t: "看检索报告", d: "答案尾部挂着审计报告条：命中率 92% · 引用 4 处 · 路由公司制度汇编 · 耗时 1.3s。" },
+      { t: "核对来源", d: "点来源卡片看命中的文件与行号，每条引用都能对回原文。" }
+    ],
+    decisions: [
+      "<b>定位判断：</b>切入政务与企业制度、申报材料审阅这类答错即担责的场景，定下「答不出优于答错」。比对 FastGPT、Dify 与 Kimi、ima 四款：它们都以答不出为失败、指标看覆盖率与流畅度；这款把替代对象定为人工翻查原文，精度对到条款级，只做本地部署、文档不出公司网。",
+      "<b>需求定义：</b>审计报告收敛为五项可独立核验的指标：总评分、路由准确率、上下文完整度、出处行号、遗漏项，砍掉模型自报的置信度。坏文档导入即报错拦截并标红、不做静默跳过——静默跳过会让答案漏引，用户事后无从察觉。",
+      "<b>评审推进：</b>独立承担需求、交互与审计口径，检索内核由组内资深工程师迭代。把十余分钟口述需求转译成书面基线；不做单版提案，首轮给 6 个完整方向版本、一轮内定下基线。18 天迭代 7 轮，3 轮整版重做均由评审否决触发。",
+      "<b>前端实现：</b>桌面端选 Tauri 弃 Electron——本地文档处理场景下 100MB Chromium 与收益不对等，发布 5 个免运行时可执行文件；抽出三级文字语义与 55 个 CSS 变量做双主题共用令牌，引用定位到文件与行号、支持逐条反查原文。",
+      "<b>验收口径：</b>验收分三层：工程项可核验、业务效果可复核、指标即产品。审计报告交付业务方使用，无需开发方解释即可逐条核对；2 个部门实测，财会部门按真实申报材料跑通全流程，据出处行号与遗漏项判定是否采信。"
+    ],
+    nums: [["18", "天 · 7 轮迭代"], ["5", "项指标逐条可核验"], ["2", "个部门按真实材料实测"]]
+  },
+  "msserver": {
+    name: "总指挥部 · 多智能体协作交付引擎",
+    short: "总指挥部",
+    sub: "自研开源 · 多智能体并行开发的冲突治理与交付达标验收",
+    mode: "app",
+    url: "/apps/msserver/index.html",
+    addr: "ms-tybhy · 调度与执行体解耦 · 接上即被编排",
+    badge: "编排架构",
+    poster: "/media/posters/msserver.jpg",
+    guide: [
+      { t: "看编排架构", d: "架构动画循环播放：老板只下指令、只看异常；秘书一对多派发到条线 PM，PM 与开发、测试三角互连、改动范围互报。" },
+      { t: "秘书调度", d: "各条线自主上报进度，秘书解析入库、按单派活；调度协议与执行体解耦，Claude Code、opencode 接上即被编排。" },
+      { t: "冲突裁决", d: "两个团队改同一个文件：自动检测、给出协调建议（动画里的琥珀预警）——靠机制，不靠人盯。" },
+      { t: "全局可观测", d: "看板三栏加四个状态计数（进行中 / 观察 / 报错 / 感染率），全局健康度一屏看完。" },
+      { t: "工程化", d: "77 项 pytest 盖住调度与裁决链路；幂等安装、真实启动、冲突演示三个脚本，第三方照流程可复现。" }
+    ],
+    decisions: [
+      "<b>定位与边界：</b>比对 AutoGen、CrewAI、LangGraph 与工作流引擎四类方案，能力均止于对话协作；自研范围只收两类空白——多智能体写同一文件的冲突治理，与交付成果的达标验收。形态定为开源单机工具，多租户、计费、灰度与 A/B 全部砍掉，13 项候选功能只留 5 项。",
+      "<b>验收机制：</b>规则层自动验收、全程零 token，两条硬判据：工作区存在提交、改动文件不越出团队目录。通过即标记完成并自动派发下游任务、不设人工复核；未通过列明越界文件与缺失提交，结论连同 commit 号与驳回原因入库，界面可逐条追溯。",
+      "<b>冲突与红线：</b>冲突判定分两层：正则匹配零 token，未覆盖情形才交模型裁决，且模型输出仅作参考、最终处置由规则层决定。十条合流红线（禁止直推主干、跨目录写入、编造验收证据）落为机器可执行规则，换工具链后约束不失效。",
+      "<b>工程与自证：</b>后端 6,869 行 Python、前端 4,048 行 TypeScript，编排由事件驱动状态机承载；模型、执行器与冲突规则抽为可插拔接口，入口文件从 663 行压到 105 行。77 项 pytest 与构建、lint 全过，交付幂等安装、真实启动、冲突演示三个可复现脚本。"
+    ],
+    nums: [["6,869", "行 Python · 4,048 行 TS"], ["77", "项 pytest 与 lint 全过"], ["10", "条合流红线 · 机器可执行"]]
+  },
+  "prism": {
+    name: "棱镜 · 手机远程 AI 编程",
+    short: "棱镜",
+    sub: "自研 · 手机远程 AI 编程客户端：指令下发、结果回传，不做画面串流",
+    mode: "app",
+    phone: true,
+    url: "/apps/prism/index.html",
+    addr: "localhost:8787/apps/prism/ · 高保真界面",
+    badge: "高保真界面",
+    poster: "/media/posters/prism.jpg",
+    guide: [
+      { t: "看主界面", d: "对话页是金黑气泡 UI：手机向主机 Agent 下发指令，走文本协议、不串流画面。" },
+      { t: "切「项目列表」", d: "项目 / 会话 / 文件三层抽屉：数据源在桌面端，手机只做控制端。" },
+      { t: "双模式", d: "opencode 模式连宿舍机服务（REST + SSE 流式）；直连模式接任意 OpenAI 兼容接口。" },
+      { t: "构建链", d: "aapt2 → javac → d8 → apksigner 全链路手动编排，单条命令出安装包，零第三方构建依赖。" }
+    ],
+    decisions: [
+      "<b>定位与边界：</b>需求是「手机下指令、主机执行并回传」，方案初期即排除画面串流——带宽与延迟都劣于文本协议。数据源留在桌面端、手机只做控制端，权限边界天然清晰。",
+      "<b>方案设计：</b>opencode 服务与任意 OpenAI 兼容接口抽象成同一套接口，双传输层共用一个聊天壳：新增模型只加枚举值、不新增链路。design-mockup/refraction-hifi.html 是唯一 UI 源，构建时自动覆盖进 APK——改一处即两端同步。",
+      "<b>工程实现：</b>构建链 aapt2 → javac → d8 → apksigner 全链路手动编排，零第三方构建依赖，单条命令产出安装包；全部逻辑收在 2 个 Java 文件（Activity + Bridge），排查与重装都在可控范围。"
+    ],
+    nums: [["2", "种接入模式 · 一套接口"], ["0", "第三方构建依赖"], ["2", "个 Java 文件装下全部逻辑"]]
+  }
+};
+
+/* ═══════════════════════════════════════════════
+   第一屏：能力手风琴
+   ═══════════════════════════════════════════════ */
+(function(){
+  const caps = Array.from(document.querySelectorAll('.cap'));
+  caps.forEach(cap => {
+    cap.querySelector('.cap-head').addEventListener('click', () => {
+      if(cap.dataset.open === '1') return;
+      caps.forEach(c => {
+        const on = c === cap;
+        c.dataset.open = on ? '1' : '0';
+        c.style.setProperty('--g', on ? '4' : '1');
+        c.querySelector('.cap-head').setAttribute('aria-expanded', on ? 'true' : 'false');
+      });
+    });
+  });
+})();
+
+/* ═══════════════════════════════════════════════
+   第三屏：详情转场 + 信息栏
+   ═══════════════════════════════════════════════ */
+const detail   = document.getElementById('detail');
+const work     = document.getElementById('work');
+const playerEl  = document.getElementById('dt-player');
+const frame     = document.getElementById('dt-frame');
+const loadingEl = document.getElementById('dt-loading');
+
+/* 预载全部项目海报：点开详情时加载态立即可见，不出现“白底等图”的闪帧 */
+Object.values(PROJECTS).forEach(p => { [p.poster, p.boot].forEach(src => { if(src){ const i = new Image(); i.src = src; } }); });
+const crumbsEl  = document.getElementById('dt-crumbs-cur');
+
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* —— 板面内容画布等比缩放：设计基准 1388×848 —— */
+const boardEl = document.querySelector('.board');
+const BASE_W = 1388, BASE_H = 848;
+function fitBoard(){
+  if(!boardEl) return;
+  const s = Math.min(boardEl.clientWidth / BASE_W, boardEl.clientHeight / BASE_H);
+  boardEl.style.setProperty('--bs', s);
+}
+fitBoard();
+window.addEventListener('resize', fitBoard);
+
+/* —— 第一屏内容画布等比缩放：设计基准 1440×900 —— */
+const stageEl = document.getElementById('top');
+function fitStage(){
+  if(!stageEl) return;
+  const s = Math.min(stageEl.clientWidth / 1440, stageEl.clientHeight / 900);
+  stageEl.style.setProperty('--ss', s);
+}
+fitStage();
+window.addEventListener('resize', fitStage);
+let state = 'grid';          // grid | opening | detail | closing
+let currentKey = null;
+
+/* —— 播放器内部画布：桌面应用 1440×810，手机应用 390×780 —— */
+function fitPlayer(){
+  const p = PROJECTS[currentKey] || {};
+  const W = p.phone ? 390 : 1440, H = p.phone ? 780 : 810;
+  const full = document.fullscreenElement === playerEl;
+  const cw = playerEl.clientWidth  || W;
+  const ch = playerEl.clientHeight || H;
+
+  /* 全屏 · 桌面应用且屏幕比设计稿大：按真实像素铺满，1:1 渲染，无黑边不模糊 */
+  if(full && !p.phone && cw >= W && ch >= H){
+    frame.style.width  = cw + 'px';
+    frame.style.height = ch + 'px';
+    frame.style.transform = 'none';
+    frame.style.left = '0px';
+    frame.style.top  = '0px';
+    return;
+  }
+
+  frame.style.width  = W + 'px';
+  frame.style.height = H + 'px';
+  /* 其余情况：宽高等比装进容器，留白居中，绝不裁切应用内容 */
+  const k = full ? Math.min(cw / W, ch / H) : cw / W;
+  frame.style.transform = 'scale(' + k + ')';
+  frame.style.left = (full ? Math.max(0, (cw - W * k) / 2) : 0) + 'px';
+  frame.style.top  = (full ? Math.max(0, (ch - H * k) / 2) : 0) + 'px';
+}
+window.addEventListener('resize', () => { if(state === 'detail') fitPlayer(); });
+
+/* —— 全屏查看演示：整屏放大播放器，画面等比居中 —— */
+const fsBtn = document.getElementById('dt-fs');
+if(!playerEl.requestFullscreen){ fsBtn.style.display = 'none'; }
+fsBtn.addEventListener('click', () => {
+  if(document.fullscreenElement){
+    if(document.exitFullscreen) document.exitFullscreen();
+  }else if(playerEl.requestFullscreen){
+    playerEl.requestFullscreen().catch(() => {});
+  }
+});
+document.addEventListener('fullscreenchange', () => {
+  const on = document.fullscreenElement === playerEl;
+  fsBtn.textContent = on ? '退出全屏' : '全屏';
+  fsBtn.setAttribute('aria-label', on ? '退出全屏' : '全屏查看演示');
+  /* 全屏切换时容器尺寸要下一帧才落定，连打几次保证算到真实宽高 */
+  fitPlayer();
+  requestAnimationFrame(fitPlayer);
+  setTimeout(fitPlayer, 120);
+  setTimeout(fitPlayer, 320);
+});
+
+let loadGuard = null;
+let appLoading = false;   /* 只在真的在载应用时才走淡出，避免 about:blank 的 load 误触发 */
+
+/* iframe load 后：等它画完两帧再淡出加载态 —— 应用内容先在遮罩底下画好，再交叉淡出 */
+function revealWhenPainted(){
+  const reveal = () => {
+    loadingEl.style.opacity = '0';
+    setTimeout(() => {
+      if(loadingEl.style.opacity === '0'){
+        loadingEl.style.display = 'none';
+      }
+    }, 330);
+  };
+  try{
+    const w = frame.contentWindow;
+    if(w && w.requestAnimationFrame){ w.requestAnimationFrame(() => w.requestAnimationFrame(reveal)); return; }
+  }catch(e){}
+  reveal();
+}
+
+frame.addEventListener('load', () => {
+  clearTimeout(loadGuard);
+  if(appLoading){ appLoading = false; revealWhenPainted(); }
+  try{
+    const d = frame.contentDocument;
+    if(d && d.scrollingElement) d.scrollingElement.scrollTop = 0;
+  }catch(e){}
+});
+
+/* —— 信息栏渲染 —— */
+function renderInfo(key){
+  const p = PROJECTS[key];
+  document.getElementById('dt-name').textContent = p.name;
+  document.getElementById('dt-sub').textContent  = p.sub;
+  crumbsEl.textContent = p.short;
+  /* 地址条随部署环境变化：本地看 localhost，公网看真实域名 */
+  const hostNow = location.host || 'localhost:8787';
+  const addrText = p.addr
+    ? p.addr.replace(/localhost:\d+/g, hostNow)
+    : hostNow + (p.url || '');
+  document.getElementById('dt-addr').textContent = addrText;
+  document.getElementById('dt-badge').textContent = p.badge || '打开即用';
+
+  document.getElementById('dt-guide').innerHTML = p.guide.map((g, i) =>
+    `<li${i === 0 ? ' class="on"' : ''}><span><b>${g.t}</b>——${g.d}</span></li>`).join('');
+  document.querySelectorAll('#dt-guide li').forEach((li, i) => {
+    li.addEventListener('click', () => {
+      document.querySelectorAll('#dt-guide li').forEach(x => x.classList.remove('on'));
+      li.classList.add('on');
+    });
+  });
+
+  document.getElementById('dt-dec').innerHTML =
+    p.decisions.map(d => `<li>${d}</li>`).join('');
+
+  document.getElementById('dt-nums').innerHTML =
+    p.nums.map(n => `<div><b>${n[0]}</b><span>${n[1]}</span></div>`).join('');
+
+  document.getElementById('dt-more').innerHTML =
+    Object.keys(PROJECTS).filter(k => k !== key).map(k => {
+      const q = PROJECTS[k];
+      return `<button data-key="${k}" aria-label="切换到 ${q.short}">
+        <img src="${q.poster}" alt="" /><span class="mtxt"><b>${q.short}</b><span>${q.sub}</span></span></button>`;
+    }).join('');
+  document.querySelectorAll('#dt-more button').forEach(b => {
+    b.addEventListener('click', () => switchProject(b.dataset.key));
+  });
+}
+
+/* 转场一开始就铺上开场图（登录页截图），不透明、无过渡 —— 播放器从第一帧起就不露底 */
+function showBoot(p){
+  playerEl.classList.toggle('phone', !!p.phone);
+  fitPlayer();
+  if(p.mode === 'shot') return;
+  loadingEl.style.backgroundImage = 'url("' + (p.boot || p.poster) + '")';
+  loadingEl.style.transition = 'none';
+  loadingEl.style.opacity = '1';
+  loadingEl.style.display = 'flex';
+  requestAnimationFrame(() => { loadingEl.style.transition = ''; });
+}
+
+function loadApp(key){
+  const p = PROJECTS[key];
+  const shot = document.getElementById('dt-shot');
+  playerEl.classList.toggle('phone', !!p.phone);
+  fitPlayer();
+  clearTimeout(loadGuard);
+  if(p.mode === 'shot'){
+    frame.src = 'about:blank';
+    shot.src = p.poster;
+    shot.style.display = '';
+    frame.style.display = 'none';
+    loadingEl.style.display = 'none';
+  }else{
+    shot.style.display = 'none';
+    frame.style.display = '';
+    loadingEl.style.backgroundImage = 'url("' + (p.boot || p.poster) + '")';
+    /* 不透明直接铺上（关闭过渡防上次遗留 opacity:0 造成淡入露白），绝不露 iframe 白底 */
+    loadingEl.style.transition = 'none';
+    loadingEl.style.opacity = '1';
+    loadingEl.style.display = 'flex';
+    requestAnimationFrame(() => { loadingEl.style.transition = ''; });
+    appLoading = true;
+    frame.src = p.url + (p.url.indexOf('?') >= 0 ? '&' : '?') + 'demo=1' + (p.phone ? '#app' : '');
+    loadGuard = setTimeout(() => { appLoading = false; revealWhenPainted(); }, 9000);
+  }
+}
+
+/* —— 打开：轻量淡入，动画落定后再加载应用（转场与重加载彻底分离） —— */
+function openDetail(key, card){
+  if(state !== 'grid') return;
+  state = 'opening';
+  currentKey = key;
+  work.dataset.phase = 'opening';
+  detail.dataset.state = 'anim';
+  detail.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  renderInfo(key);
+  showBoot(PROJECTS[key]);
+  fitPlayer();
+
+  const D = REDUCED ? 0 : 280;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    detail.dataset.state = 'open';
+  }));
+
+  setTimeout(() => {
+    loadApp(key);
+    state = 'detail';
+  }, D);
+}
+
+/* —— 关闭：淡出回板面 —— */
+function closeDetail(){
+  if(state !== 'detail') return;
+  state = 'closing';
+  detail.dataset.state = 'anim';
+  detail.setAttribute('aria-hidden', 'true');
+  work.dataset.phase = 'closing';
+
+  frame.src = 'about:blank';
+  clearTimeout(loadGuard);
+  appLoading = false;
+  loadingEl.style.display = 'none';
+
+  const D = REDUCED ? 0 : 300;
+  setTimeout(() => {
+    work.dataset.phase = 'idle';
+    detail.dataset.state = 'closed';
+    document.body.style.overflow = '';
+    currentKey = null;
+    state = 'grid';
+  }, D);
+}
+
+/* —— 详情态内换项目：直接换片，播放器走加载态 —— */
+function switchProject(key){
+  if(state !== 'detail' || key === currentKey) return;
+  currentKey = key;
+  renderInfo(key);
+  showBoot(PROJECTS[key]);
+  fitPlayer();
+  loadApp(key);
+}
+
+/* —— 事件绑定 —— */
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('click', () => openDetail(card.dataset.key, card));
+  card.addEventListener('keydown', e => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openDetail(card.dataset.key, card); }
+  });
+});
+document.getElementById('dt-back').addEventListener('click', closeDetail);
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && state === 'detail') closeDetail();
+});
+</script>
+</body>
+</html>

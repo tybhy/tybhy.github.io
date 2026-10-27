@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><script>window.__DEMO_APP="msserver";window.__DEMO_BASE=/demo/;window.__DEMO_HOSTS=[];</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>总指挥部 · 多智能体协作交付引擎</title>
+<style>
+  :root{
+    --bg:      #f3f6fa;
+    --panel:   #ffffff;
+    --ink:     #131a23;
+    --ink-2:   #37424f;
+    --dim:     #78838f;
+    --blue:    #1f5fd0;
+    --blue-bg: rgba(31,95,208,.08);
+    --amber:   #b97a12;
+    --amber-bg:rgba(185,122,18,.10);
+    --green:   #2e7d4f;
+    --line:    rgba(20,34,52,.13);
+    --line-soft:rgba(20,34,52,.08);
+    --shadow-c:24,40,62;
+    --ease-out:cubic-bezier(.16,1,.3,1);
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(900px 420px at 78% -8%, rgba(31,95,208,.05), transparent 62%),
+      var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .stage{ width:1180px; max-width:96vw; }
+
+  /* ── 顶栏：定位行 ── */
+  .eyebrow{
+    font-size:10px; letter-spacing:.3em; color:var(--dim);
+    display:flex; align-items:center; gap:12px;
+  }
+  .eyebrow::after{ content:""; flex:1; height:1px; background:var(--line-soft); }
+  .thesis{
+    margin-top:10px; font-size:15.5px; line-height:1.65; color:var(--ink-2);
+    max-width:980px;
+  }
+  .thesis b{ color:var(--ink); font-weight:600; }
+
+  /* ── 架构图 ── */
+  .arch{
+    margin-top:24px;
+    background:var(--panel);
+    border-radius:6px;
+    box-shadow:0 1px 0 rgba(var(--shadow-c),.05), 0 16px 34px -22px rgba(var(--shadow-c),.35);
+    border:1px solid var(--line-soft);
+    padding:28px 38px 22px;
+    position:relative;
+  }
+  .arch-label{
+    position:absolute; top:-9px; left:30px;
+    font-size:9px; letter-spacing:.26em; color:var(--dim);
+    background:var(--panel); padding:0 10px;
+  }
+
+  /* 画布坐标系：1104 × 448，节点绝对定位，连线一层 SVG 垫底 */
+  .diagram{ position:relative; height:448px; }
+  .diagram svg.wires{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+  .diagram svg.wires path{ stroke:var(--line); stroke-width:1.4; fill:none; }
+  .diagram svg.wires path.flow{
+    stroke:var(--blue); stroke-width:1.6; stroke-dasharray:5 6;
+    opacity:0; transition:opacity .3s ease;
+  }
+  .diagram svg.wires path.flow.on{ opacity:1; animation:drawdown .7s var(--ease-out) forwards; }
+  .diagram svg.wires path.flow.hot{ stroke:var(--amber); }
+  @keyframes drawdown{ from{ stroke-dashoffset:56; } to{ stroke-dashoffset:0; } }
+
+  /* 节点通用 */
+  .nd{
+    position:absolute; text-align:center;
+    background:linear-gradient(180deg,#fff,#fbfcfe);
+    border:1px solid var(--line); border-radius:5px;
+    transition:box-shadow .5s ease, border-color .5s ease;
+  }
+  .nd .t{ font-weight:600; letter-spacing:.04em; }
+  .nd .s{ color:var(--dim); letter-spacing:.05em; }
+  .nd.lit{ border-color:rgba(31,95,208,.45); box-shadow:0 0 0 2px var(--blue-bg), 0 8px 20px -12px rgba(var(--shadow-c),.4); }
+  .nd.conf{ border-color:rgba(185,122,18,.55); box-shadow:0 0 0 2px var(--amber-bg); }
+
+  .boss{ left:442px; top:0; width:220px; padding:9px 10px 8px; }
+  .boss .t{ font-size:14px; }
+  .boss .s{ font-size:10px; margin-top:2px; }
+
+  .secretary{ left:352px; top:96px; width:400px; padding:10px 12px 9px; border-width:1.4px; }
+  .secretary .t{ font-size:15px; }
+  .secretary .s{ font-size:10px; margin-top:3px; }
+  .secretary .pulse{
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--blue); margin-right:7px; vertical-align:2px;
+    opacity:0; transition:opacity .4s ease;
+  }
+  .secretary.lit .pulse{ opacity:1; animation:breath 1.6s ease-in-out infinite; }
+  @keyframes breath{ 0%,100%{ opacity:.25; } 50%{ opacity:1; } }
+
+  .pm{ width:150px; padding:7px 8px 6px; top:218px; }
+  .pm .t{ font-size:12.5px; }
+  .pm .s{ font-size:9.5px; margin-top:2px; }
+
+  .worker{ width:130px; padding:6px 7px 5px; top:322px; }
+  .worker .t{ font-size:11.5px; }
+  .worker .s{ font-size:9px; margin-top:2px; }
+
+  /* 指令胶囊：老板→秘书 */
+  .order{
+    position:absolute; left:552px; top:56px;
+    transform:translate(-50%,-12px);
+    font-size:10px; letter-spacing:.1em; color:#fff;
+    background:var(--blue); border-radius:20px; padding:3px 13px;
+    opacity:0; pointer-events:none; white-space:nowrap; z-index:2;
+    box-shadow:0 6px 14px -8px rgba(31,95,208,.6);
+    transition:all .7s var(--ease-out);
+  }
+  .order.show{ opacity:1; transform:translate(-50%,2px); }
+
+  /* 空隙说明 */
+  .note{
+    position:absolute; font-size:10px; line-height:1.55; color:var(--dim);
+    letter-spacing:.03em;
+  }
+  .note b{ color:var(--ink-2); font-weight:600; }
+  .note .k{
+    display:block; font-size:8.5px; letter-spacing:.22em; color:#9aa5b1;
+    margin-bottom:3px;
+  }
+  .note.nr{ text-align:left; }
+  .note.nl{ text-align:right; }
+
+  /* 扇出上的流程标签 */
+  .flowtag{
+    position:absolute; font-size:9px; letter-spacing:.12em; color:#9aa5b1;
+    transition:color .4s ease;
+  }
+  .diagram.live .flowtag{ color:var(--blue); }
+
+  /* 三角互连说明（每条线组下方） */
+  .triocap{
+    position:absolute; top:374px; width:300px; text-align:center;
+    font-size:9px; letter-spacing:.1em; color:#9aa5b1;
+  }
+
+  /* 冲突检测条 */
+  .conflict{
+    margin-top:14px;
+    display:flex; align-items:center; gap:14px;
+    border:1px dashed var(--line); border-radius:5px;
+    padding:9px 18px; background:rgba(255,255,255,.5);
+    transition:all .5s ease;
+  }
+  .conflict .cicon{ flex:none; font-size:13px; color:var(--dim); transition:color .4s ease; }
+  .conflict .ct{ font-size:11px; letter-spacing:.1em; color:var(--dim); transition:color .4s ease; }
+  .conflict .cbar{ flex:1; height:1px; background:var(--line-soft); }
+  .conflict .sugg{
+    font-size:10.5px; color:var(--amber); letter-spacing:.04em;
+    opacity:0; transform:translateX(8px); transition:all .5s var(--ease-out);
+    white-space:nowrap;
+  }
+  .arch.hot .conflict{ border-color:rgba(185,122,18,.4); background:var(--amber-bg); }
+  .arch.hot .conflict .cicon,
+  .arch.hot .conflict .ct{ color:var(--amber); }
+  .arch.hot .conflict .sugg{ opacity:1; transform:none; }
+
+  /* ── 功能三块 ── */
+  .feats{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:22px; margin-top:20px; }
+  .feat{ border-top:2px solid var(--ink); padding-top:11px; }
+  .feat h3{ font-size:12.5px; font-weight:600; letter-spacing:.06em; }
+  .feat p{ margin-top:5px; font-size:11px; line-height:1.7; color:var(--ink-2); }
+  .feat p b{ color:var(--ink); font-weight:600; }
+  .feat .fn{ font-size:9px; letter-spacing:.24em; color:var(--dim); margin-bottom:7px; }
+
+  /* 数字条 */
+  .nums{
+    margin-top:18px; padding-top:13px; border-top:1px solid var(--line-soft);
+    display:flex; gap:44px; align-items:baseline;
+  }
+  .nums div b{ font-size:19px; font-weight:600; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+  .nums div span{ display:block; font-size:9px; letter-spacing:.14em; color:var(--dim); margin-top:2px; }
+  /* 复位 diagram .note 的绝对定位，避免与数字条备注类名冲突 */
+  .nums .note{ position:static; width:auto; text-align:left; margin-left:auto; font-size:10px; color:var(--dim); letter-spacing:.08em; }
+
+  @media (max-height:820px){
+    .stage{ transform:scale(.92); transform-origin:center; }
+  }
+  @media (max-height:760px){
+    .stage{ transform:scale(.84); }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="eyebrow">MS-TYBHY · GENERAL HEADQUARTERS</div>
+  <p class="thesis"><b>调度协议与执行体解耦</b>：底层是 Claude Code、opencode 还是别的 Agent 都无所谓，接上即被编排；<b>治理与验收不绑任何一家框架。</b></p>
+
+  <div class="arch" id="arch">
+    <span class="arch-label">编排架构 · 四层自研</span>
+
+    <div class="diagram" id="diagram">
+      <svg class="wires" viewBox="0 0 1104 448" preserveAspectRatio="none">
+        <!-- 老板 → 秘书 -->
+        <path d="M552 54 V96"/>
+        <path class="flow" id="f-bs" d="M552 54 V96"/>
+        <!-- 秘书 → 三条线 PM（一对多） -->
+        <path d="M552 154 C552 190 200 180 200 218"/>
+        <path class="flow" id="f-f1" d="M552 154 C552 190 200 180 200 218"/>
+        <path d="M552 154 V218"/>
+        <path class="flow" id="f-f2" d="M552 154 V218"/>
+        <path d="M552 154 C552 190 904 180 904 218"/>
+        <path class="flow" id="f-f3" d="M552 154 C552 190 904 180 904 218"/>
+        <!-- 条线一：PM × 开发 × 测试 三角 -->
+        <path d="M200 262 L130 322"/><path class="flow" id="t1-pd" d="M200 262 L130 322"/>
+        <path d="M200 262 L300 322"/><path class="flow" id="t1-pt" d="M200 262 L300 322"/>
+        <path d="M130 344 H235"/><path class="flow" id="t1-dt" d="M130 344 H235"/>
+        <!-- 条线二 -->
+        <path d="M552 262 L472 322"/><path class="flow" id="t2-pd" d="M552 262 L472 322"/>
+        <path d="M552 262 L652 322"/><path class="flow" id="t2-pt" d="M552 262 L652 322"/>
+        <path d="M472 344 H577"/><path class="flow" id="t2-dt" d="M472 344 H577"/>
+        <!-- 条线三 -->
+        <path d="M904 262 L824 322"/><path class="flow" id="t3-pd" d="M904 262 L824 322"/>
+        <path d="M904 262 L924 322"/><path class="flow" id="t3-pt" d="M904 262 L924 322"/>
+        <path d="M824 344 H919"/><path class="flow" id="t3-dt" d="M824 344 H919"/>
+      </svg>
+
+      <!-- 顶层 -->
+      <div class="nd boss" id="boss">
+        <div class="t">老板（你）</div>
+        <div class="s">只下指令 · 只看异常</div>
+      </div>
+      <div class="order" id="order">↓ 指令：今晚修复登录超时</div>
+
+      <!-- 协调层 -->
+      <div class="nd secretary" id="secretary">
+        <div class="t"><span class="pulse"></span>秘书 Agent</div>
+        <div class="s">收上报 · 拆任务单 · 按线派活 · 冲突时请 LLM 裁决</div>
+      </div>
+
+      <!-- 扇出区说明 -->
+      <span class="flowtag" style="left:568px; top:170px">↓ 派发任务单</span>
+      <span class="flowtag" style="left:392px; top:190px">↑ 自主上报</span>
+      <span class="flowtag" style="left:922px; top:172px">…可再加 N 条线</span>
+
+      <!-- 空隙说明：左上 / 右上 / 左中 / 右中 -->
+      <div class="note nl" style="left:0; top:2px; width:400px">
+        <span class="k">COMMAND</span>
+        <b>指令只说一句</b>，拆任务单是秘书的事，过程不必进你的视野。
+      </div>
+      <div class="note nr" style="left:760px; top:2px; width:344px">
+        <span class="k">ESCALATION</span>
+        <b>只处理异常</b>：全链路里只有冲突和报错会上浮到这层。
+      </div>
+      <div class="note nl" style="left:0; top:104px; width:330px">
+        <span class="k">COORDINATION</span>
+        各条线的<b>进度</b>自动解析入库，秘书汇总后按单派活。
+      </div>
+      <div class="note nr" style="left:772px; top:104px; width:332px">
+        <span class="k">ADJUDICATION</span>
+        改动范围实时比对，<b>撞了自动亮预警</b>，再给一条协调建议。
+      </div>
+
+      <!-- 条线 PM -->
+      <div class="nd pm" id="pm1" style="left:125px">
+        <div class="t">PM · 前端线</div><div class="s">向秘书汇报</div>
+      </div>
+      <div class="nd pm" id="pm2" style="left:477px">
+        <div class="t">PM · 后端线</div><div class="s">向秘书汇报</div>
+      </div>
+      <div class="nd pm" id="pm3" style="left:829px">
+        <div class="t">PM · 数据线</div><div class="s">向秘书汇报</div>
+      </div>
+
+      <!-- 三角说明（PM × 开发 × 测试 两两互连） -->
+      <div class="triocap" style="left:50px">PM × 开发 × 测试 三角互连 · 改动互报</div>
+      <div class="triocap" style="left:402px">进度与改动范围三角内实时同步</div>
+      <div class="triocap" style="left:754px">执行体不限框架 · 接上就能跑</div>
+
+      <!-- 执行体 -->
+      <div class="nd worker" id="w1d" style="left:65px"><div class="t">开发 Agent</div><div class="s">任意框架接入</div></div>
+      <div class="nd worker" id="w1t" style="left:235px"><div class="t">测试 Agent</div><div class="s">任意框架接入</div></div>
+      <div class="nd worker" id="w2d" style="left:407px"><div class="t">开发 Agent</div><div class="s">任意框架接入</div></div>
+      <div class="nd worker" id="w2t" style="left:577px"><div class="t">测试 Agent</div><div class="s">任意框架接入</div></div>
+      <div class="nd worker" id="w3d" style="left:749px"><div class="t">开发 Agent</div><div class="s">任意框架接入</div></div>
+      <div class="nd worker" id="w3t" style="left:919px"><div class="t">测试 Agent</div><div class="s">任意框架接入</div></div>
+    </div>
+
+    <div class="conflict" id="conflict">
+      <span class="cicon">⚠</span>
+      <span class="ct">冲突检测 · 改动范围实时比对</span>
+      <span class="cbar"></span>
+      <span class="sugg">前端线与后端线同时改 api/client.ts → 协调建议已下发两边</span>
+    </div>
+  </div>
+
+  <div class="feats">
+    <div class="feat"><div class="fn">01 · DISPATCH</div><h3>秘书调度</h3><p>各条线<b>自主上报</b>，秘书解析入库、按单派活；老板只处理异常，从不盯过程。</p></div>
+    <div class="feat"><div class="fn">02 · ADJUDICATION</div><h3>冲突裁决</h3><p>两条线改同一个文件：<b>自动检测</b> + LLM 协调建议——治理靠机制，不靠人盯。</p></div>
+    <div class="feat"><div class="fn">03 · OBSERVABILITY</div><h3>全局可观测</h3><p>看板三栏 + 四个计数（干活中 / 观察 / 报错 / 感染率），<b>健康度一眼看完</b>。</p></div>
+  </div>
+
+  <div class="nums">
+    <div><b>77</b><span>项自动化测试</span></div>
+    <div><b>4</b><span>层架构 · 调度 / 协调 / 执行 / 可观测</span></div>
+    <div><b>N</b><span>条线 × 执行体 · 框架解耦</span></div>
+    <div class="note">单机自持 · 本机部署 · Python + Web 看板</div>
+  </div>
+</div>
+
+<script>
+/* 循环动画：指令落下 → 秘书点亮 → 一对多派发到 PM → 三角内点亮 → 双线冲突 → 建议消化 → 复位 */
+(function(){
+  const arch   = document.getElementById('arch');
+  const dia    = document.getElementById('diagram');
+  const boss   = document.getElementById('boss');
+  const sec    = document.getElementById('secretary');
+  const order  = document.getElementById('order');
+  const pms    = ['pm1','pm2','pm3'].map(id=>document.getElementById(id));
+  const trios  = [
+    { pd:'t1-pd', pt:'t1-pt', dt:'t1-dt', d:'w1d', t:'w1t' },
+    { pd:'t2-pd', pt:'t2-pt', dt:'t2-dt', d:'w2d', t:'w2t' },
+    { pd:'t3-pd', pt:'t3-pt', dt:'t3-dt', d:'w3d', t:'w3t' }
+  ];
+  const $id = id => document.getElementById(id);
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function reset(){
+    arch.classList.remove('hot');
+    dia.classList.remove('live');
+    order.classList.remove('show');
+    boss.classList.remove('lit'); sec.classList.remove('lit');
+    pms.forEach(p=>p.classList.remove('lit'));
+    trios.forEach(tr=>{
+      ['pd','pt','dt'].forEach(k=>$id(tr[k]).classList.remove('on','hot'));
+      $id(tr.d).classList.remove('lit','conf');
+      $id(tr.t).classList.remove('lit','conf');
+    });
+    $id('f-bs').classList.remove('on');
+    ['f-f1','f-f2','f-f3'].forEach(id=>$id(id).classList.remove('on'));
+  }
+
+  function round(){
+    reset();
+    /* 1 · 指令落下 */
+    setTimeout(()=>{ boss.classList.add('lit'); order.classList.add('show'); }, 500);
+    /* 2 · 秘书点亮，指令线走通 */
+    setTimeout(()=>{ order.classList.remove('show'); $id('f-bs').classList.add('on'); sec.classList.add('lit'); dia.classList.add('live'); }, 1600);
+    /* 3 · 一对多派发到三条线 PM */
+    [[0,2750],[1,2950],[2,3150]].forEach(([i,ms])=>{
+      setTimeout(()=>{ $id('f-f'+(i+1)).classList.add('on'); pms[i].classList.add('lit'); }, ms);
+    });
+    /* 4 · 三角内点亮：PM→开发 / PM→测试 / 开发↔测试（改动互报） */
+    trios.forEach((tr,i)=>{
+      const base = 3700 + i*260;
+      setTimeout(()=>{ $id(tr.pd).classList.add('on'); $id(tr.d).classList.add('lit'); }, base);
+      setTimeout(()=>{ $id(tr.pt).classList.add('on'); $id(tr.t).classList.add('lit'); }, base+170);
+      setTimeout(()=>{ $id(tr.dt).classList.add('on'); }, base+360);
+    });
+    /* 5 · 前端线 / 后端线撞文件：琥珀预警 */
+    setTimeout(()=>{
+      [['w1d','t1-pd','t1-dt'],['w2d','t2-pd','t2-dt']].forEach(([w, l1, l2])=>{
+        $id(w).classList.add('conf');
+        $id(l1).classList.add('hot'); $id(l2).classList.add('hot');
+      });
+      $id('w1t').classList.add('conf'); $id('w2t').classList.add('conf');
+    }, 6400);
+    /* 6 · 冲突检测条亮起 + 建议下发 */
+    setTimeout(()=>{ arch.classList.add('hot'); }, 7000);
+    /* 7 · 建议消化，恢复常态，停一拍再来一轮 */
+    setTimeout(()=>{
+      ['w1d','w1t','w2d','w2t'].forEach(id=>$id(id).classList.remove('conf'));
+      ['t1-pd','t1-dt','t2-pd','t2-dt'].forEach(id=>$id(id).classList.remove('hot'));
+      arch.classList.remove('hot');
+    }, 9300);
+    setTimeout(round, 10600);
+  }
+
+  if(REDUCED){
+    /* 静态定格：全亮 */
+    boss.classList.add('lit'); sec.classList.add('lit');
+    pms.forEach(p=>p.classList.add('lit'));
+    trios.forEach(tr=>{
+      ['pd','pt','dt'].forEach(k=>$id(tr[k]).classList.add('on'));
+      $id(tr.d).classList.add('lit'); $id(tr.t).classList.add('lit');
+    });
+    $id('f-bs').classList.add('on');
+    ['f-f1','f-f2','f-f3'].forEach(id=>$id(id).classList.add('on'));
+    dia.classList.add('live');
+    return;
+  }
+  setTimeout(round, 700);
+})();
+</script>
+</body>
+</html>
